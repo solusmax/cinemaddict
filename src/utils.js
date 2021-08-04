@@ -12,10 +12,10 @@ dayjs.extend(dayjsMinMax);
 dayjs.extend(dayjsRelativeTime);
 
 export const getRandomInteger = (min = 0, max = 1) => {
-  min = Math.ceil(min);
-  max = Math.floor(max);
+  const roundedMin = Math.ceil(min);
+  const roundedMax = Math.floor(max);
 
-  return Math.floor(Math.random() * (max - min + 1) + min);
+  return Math.floor(Math.random() * (roundedMax - roundedMin + 1) + roundedMin);
 };
 
 export const getRandomFloat = (min = 0, max = 1) => {
