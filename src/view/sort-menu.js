@@ -1,4 +1,4 @@
-import { setActiveClass } from '../util.js';
+import { setActiveClass } from '../utils.js';
 
 const BUTTON_ACTIVE_STATE_CLASS_NAME = 'sort__button--active';
 

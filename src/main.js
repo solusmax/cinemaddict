@@ -20,7 +20,7 @@ import {
   createSortMenuTemplate,
   createUserProfileTemplate
 } from './view';
-import { getRandomInteger } from './util.js';
+import { getRandomInteger } from './utils.js';
 
 const FILMS_COUNT = getRandomInteger(15, 20);
 const FILMS_COUNT_PER_STEP = 5;

@@ -7,7 +7,7 @@ import {
   getRandomInteger,
   getRandomItem,
   getRandomItems
-} from '../util.js';
+} from '../utils.js';
 
 const MAX_FILM_ID = 50;
 

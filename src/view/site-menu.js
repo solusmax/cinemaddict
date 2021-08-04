@@ -1,6 +1,6 @@
 import {
   setActiveClass
-} from '../util.js';
+} from '../utils.js';
 
 const CONTROL_ACTIVE_STATE_CLASS_NAME = 'main-navigation__item--active';
 
