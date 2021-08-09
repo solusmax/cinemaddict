@@ -106,3 +106,7 @@ export const humanizeCommentDate = (date) => dayjs().to(date);
 export const getYearFromDate = (date) => dayjs(date).year();
 
 export const setActiveClass = (activityCondition, className) => activityCondition ? className : '';
+
+export const renderNode = (container, template, position = 'beforeend') => {
+  container.insertAdjacentHTML(position, template);
+};

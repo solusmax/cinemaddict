@@ -20,7 +20,10 @@ import {
   createSortMenuTemplate,
   createUserProfileTemplate
 } from './view';
-import { getRandomInteger } from './utils.js';
+import {
+  getRandomInteger,
+  renderNode
+} from './utils.js';
 
 const FILMS_COUNT = getRandomInteger(15, 20);
 const FILMS_COUNT_PER_STEP = 5;
@@ -32,10 +35,6 @@ const filmsSortedByRating = getFilmsSortedByRating(films);
 const comments = new Array(GENERATED_COMMENTS_COUNT).fill().map(() => generateComment());
 const filters = generateFilters(films);
 const userRank = getUserRank(getWatchedFilms(films).length);
-
-const renderNode = (container, template, position = 'beforeend') => {
-  container.insertAdjacentHTML(position, template);
-};
 
 const siteHeaderNode = document.querySelector('.header');
 const siteFooterNode = document.querySelector('.footer');
