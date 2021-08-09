@@ -1,5 +1,6 @@
 import {
   addPluralEnding,
+  createElement,
   getFormattedDuration,
   humanizeCommentDate,
   humanizeFilmDate,
@@ -44,7 +45,7 @@ const createEmojiTemplate = (emoji) => (
 
 const createGenreTemplate = (genre) => `<span class="film-details__genre">${genre}</span>`;
 
-export const createFilmDetailsPopupTemplate = (film, comments, emojis) => {
+const createFullFilmCardTemplate = (film, comments, emojis) => {
   const {
     comments: commentsIds,
     info: {
@@ -163,3 +164,35 @@ export const createFilmDetailsPopupTemplate = (film, comments, emojis) => {
   </section>`;
 };
 
+export default class FullFilmCard {
+  constructor(film, comments, emojis) {
+    this._element = null;
+    this._film = film;
+    this._comments = comments;
+    this._emojis = emojis;
+  }
+
+  getTemplate() {
+    return createFullFilmCardTemplate(this._film, this._comments, this._emojis);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+
+  setFilm(newFilm) {
+    this._film = newFilm;
+  }
+
+  isElementRendered() {
+    return Boolean(this._element);
+  }
+}

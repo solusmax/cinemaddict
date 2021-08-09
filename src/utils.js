@@ -11,6 +11,29 @@ dayjs.extend(dayjsDuration);
 dayjs.extend(dayjsMinMax);
 dayjs.extend(dayjsRelativeTime);
 
+export const RenderPosition = {
+  AFTERBEGIN: 'afterbegin',
+  BEFOREEND: 'beforeend',
+};
+
+export const renderElement = (container, element, position = RenderPosition.BEFOREEND) => {
+  switch (position) {
+    case RenderPosition.AFTERBEGIN:
+      container.prepend(element);
+      break;
+    case RenderPosition.BEFOREEND:
+      container.append(element);
+      break;
+  }
+};
+
+export const createElement = (template) => {
+  const newElement = document.createElement('div');
+  newElement.innerHTML = template;
+
+  return newElement.firstChild;
+};
+
 export const getRandomInteger = (min = 0, max = 1) => {
   const roundedMin = Math.ceil(min);
   const roundedMax = Math.floor(max);
@@ -106,7 +129,3 @@ export const humanizeCommentDate = (date) => dayjs().to(date);
 export const getYearFromDate = (date) => dayjs(date).year();
 
 export const setActiveClass = (activityCondition, className) => activityCondition ? className : '';
-
-export const renderNode = (container, template, position = 'beforeend') => {
-  container.insertAdjacentHTML(position, template);
-};
