@@ -50,7 +50,7 @@ const fullFilmCardComponent = new FullFilmCardView(films[0], comments, EMOJIS);
 
 const renderFullFilmCard = (film) => {
   const removeFullFilmCard = () => {
-    document.body.removeChild(fullFilmCardComponent.getElement());
+    fullFilmCardComponent.getElement().remove();
     fullFilmCardComponent.removeElement();
     document.body.classList.remove(BODY_NO_SCROLL_CLASS_NAME);
   };
@@ -60,7 +60,7 @@ const renderFullFilmCard = (film) => {
   }
 
   fullFilmCardComponent.setFilm(film);
-  document.body.appendChild(fullFilmCardComponent.getElement());
+  renderElement(document.body, fullFilmCardComponent.getElement());
   document.body.classList.add(BODY_NO_SCROLL_CLASS_NAME);
 
   const fullFilmCardCloseButtonElement = fullFilmCardComponent.getElement().querySelector('.film-details__close-btn');
