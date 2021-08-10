@@ -8,6 +8,7 @@ import {
 } from '../utils.js';
 
 const CONTROL_ACTIVE_STATE_CLASS_NAME = 'film-details__control-button--active';
+const CLOSE_BUTTON_CLASS_NAME = 'film-details__close-btn';
 
 const createCommentTemplate = (comments, id) => {
   const currentComment = comments.find((comment) => comment.id === id);
@@ -74,7 +75,7 @@ const createFullFilmCardTemplate = (film, comments, emojis) => {
     <form class="film-details__inner" action="" method="get">
       <div class="film-details__top-container">
         <div class="film-details__close">
-          <button class="film-details__close-btn" type="button">close</button>
+          <button class="${CLOSE_BUTTON_CLASS_NAME}" type="button">close</button>
         </div>
         <div class="film-details__info-wrap">
           <div class="film-details__poster">
@@ -194,5 +195,9 @@ export default class FullFilmCard {
 
   isElementRendered() {
     return Boolean(this._element);
+  }
+
+  getCloseButtonElement() {
+    return this.getElement().querySelector(`.${CLOSE_BUTTON_CLASS_NAME}`);
   }
 }

@@ -47,9 +47,11 @@ const filmsListElement = siteMainElement.querySelector('.films-list');
 const filmsListContainerElement = filmsListElement.querySelector('.films-list__container');
 
 const fullFilmCardComponent = new FullFilmCardView(films[0], comments, EMOJIS);
+let onFullFilmCardCloseButtonClickWrapper;
 
 const renderFullFilmCard = (film) => {
   const removeFullFilmCard = () => {
+    fullFilmCardComponent.getCloseButtonElement().removeEventListener('click', onFullFilmCardCloseButtonClickWrapper);
     fullFilmCardComponent.getElement().remove();
     fullFilmCardComponent.removeElement();
     document.body.classList.remove(BODY_NO_SCROLL_CLASS_NAME);
@@ -63,14 +65,14 @@ const renderFullFilmCard = (film) => {
   renderElement(document.body, fullFilmCardComponent.getElement());
   document.body.classList.add(BODY_NO_SCROLL_CLASS_NAME);
 
-  const fullFilmCardCloseButtonElement = fullFilmCardComponent.getElement().querySelector('.film-details__close-btn');
-
-  const onFullFilmCardCloseButtonClick = () => (evt) => {
+  const onFullFilmCardCloseButtonClick = (evt) => {
     evt.preventDefault();
     removeFullFilmCard();
   };
 
-  fullFilmCardCloseButtonElement.addEventListener('click', onFullFilmCardCloseButtonClick());
+  onFullFilmCardCloseButtonClickWrapper = onFullFilmCardCloseButtonClick;
+
+  fullFilmCardComponent.getCloseButtonElement().addEventListener('click', onFullFilmCardCloseButtonClickWrapper);
 };
 
 const renderFilmCard = (container, film) => {
@@ -88,14 +90,14 @@ const renderFilmCard = (container, film) => {
     renderFullFilmCard(film);
   };
 
-  const onfilmCardCommentsLinkClick = () => (evt) => {
+  const onfilmCardCommentsLinkClick = (evt) => {
     evt.preventDefault();
     renderFullFilmCard(film);
   };
 
   filmCardTitleElement.addEventListener('click', onfilmCardTitleClick);
   filmCardPosterElement.addEventListener('click', onfilmCardPosterClick);
-  filmCardCommentsLinkElement.addEventListener('click', onfilmCardCommentsLinkClick());
+  filmCardCommentsLinkElement.addEventListener('click', onfilmCardCommentsLinkClick);
 
   renderElement(container, filmComponent.getElement());
 };
@@ -122,6 +124,7 @@ const renderFilmCards = () => {
       shownFilmsCount += FILMS_COUNT_PER_STEP;
 
       if (shownFilmsCount >= films.length) {
+        showMoreButtonComponent.getElement().removeEventListener('click', onShowMoreButtonClick);
         showMoreButtonComponent.getElement().remove();
         showMoreButtonComponent.removeElement();
       }
