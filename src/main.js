@@ -42,7 +42,7 @@ const siteMainElement = document.querySelector('.main');
 renderElement(siteHeaderElement, new UserProfileView(userRank).getElement());
 renderElement(siteMainElement, new SiteMenuView(filters).getElement());
 renderElement(siteMainElement, new SortMenuView(generateSortMethods(films)).getElement());
-renderElement(siteMainElement, new FilmsListView().getElement());
+renderElement(siteMainElement, new FilmsListView(films.length).getElement());
 
 const filmsListElement = siteMainElement.querySelector('.films-list');
 const filmsListContainerElement = filmsListElement.querySelector('.films-list__container');
@@ -161,8 +161,10 @@ const renderExtraFilms = () => {
   }
 };
 
-renderFilmCards();
-renderExtraFilms();
+if (films.length > 0) {
+  renderFilmCards();
+  renderExtraFilms();
+}
 
 const footerStatisticsElement = siteFooterElement.querySelector('.footer__statistics');
 renderElement(footerStatisticsElement, new FooterStatisticsView(films.length).getElement());

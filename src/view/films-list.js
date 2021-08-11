@@ -25,12 +25,25 @@ const createFilmsListTemplate = () => (
   </section>`
 );
 
+const createEmptyFilmsListTemplate = () => (
+  `<section class="films">
+    <section class="films-list">
+      <h2 class="films-list__title">There are no movies in our database</h2>
+    </section>
+  </section>`
+);
+
 export default class FilmsList {
-  constructor() {
+  constructor(filmsCount) {
     this._element = null;
+    this._filmsCount = filmsCount;
   }
 
   getTemplate() {
+    if (this._filmsCount === 0) {
+      return createEmptyFilmsListTemplate();
+    }
+
     return createFilmsListTemplate();
   }
 
