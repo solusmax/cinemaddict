@@ -129,3 +129,5 @@ export const humanizeCommentDate = (date) => dayjs().to(date);
 export const getYearFromDate = (date) => dayjs(date).year();
 
 export const setActiveClass = (activityCondition, className) => activityCondition ? className : '';
+
+export const isEscEvent = (evt) => evt.key === 'Escape' || evt.key === 'Esc';

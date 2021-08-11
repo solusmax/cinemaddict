@@ -20,6 +20,7 @@ import SortMenuView from './view/sort-menu.js';
 import UserProfileView from './view/user-profile.js';
 import {
   getRandomInteger,
+  isEscEvent,
   renderElement
 } from './utils.js';
 
@@ -48,10 +49,12 @@ const filmsListContainerElement = filmsListElement.querySelector('.films-list__c
 
 const fullFilmCardComponent = new FullFilmCardView(films[0], comments, EMOJIS);
 let onFullFilmCardCloseButtonClickWrapper;
+let onFullFilmCardEscKeydownWrapper;
 
 const renderFullFilmCard = (film) => {
   const removeFullFilmCard = () => {
     fullFilmCardComponent.getCloseButtonElement().removeEventListener('click', onFullFilmCardCloseButtonClickWrapper);
+    window.removeEventListener('keydown', onFullFilmCardEscKeydownWrapper);
     fullFilmCardComponent.getElement().remove();
     fullFilmCardComponent.removeElement();
     document.body.classList.remove(BODY_NO_SCROLL_CLASS_NAME);
@@ -70,9 +73,18 @@ const renderFullFilmCard = (film) => {
     removeFullFilmCard();
   };
 
+  const onFullFilmCardEscKeydown = (evt) => {
+    if (isEscEvent(evt)) {
+      evt.preventDefault();
+      removeFullFilmCard();
+    }
+  };
+
   onFullFilmCardCloseButtonClickWrapper = onFullFilmCardCloseButtonClick;
+  onFullFilmCardEscKeydownWrapper = onFullFilmCardEscKeydown;
 
   fullFilmCardComponent.getCloseButtonElement().addEventListener('click', onFullFilmCardCloseButtonClickWrapper);
+  window.addEventListener('keydown', onFullFilmCardEscKeydownWrapper);
 };
 
 const renderFilmCard = (container, film) => {
