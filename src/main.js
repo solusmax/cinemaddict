@@ -11,7 +11,7 @@ import {
   getWatchedFilms
 } from './data';
 import FilmCardView from './view/film-card.js';
-import FilmsView from './view/films.js';
+import FilmsListView from './view/films-list.js';
 import FooterStatisticsView from './view/footer-statistics.js';
 import FullFilmCardView from './view/full-film-card.js';
 import ShowMoreButtonView from './view/show-more-button.js';
@@ -42,7 +42,7 @@ const siteMainElement = document.querySelector('.main');
 renderElement(siteHeaderElement, new UserProfileView(userRank).getElement());
 renderElement(siteMainElement, new SiteMenuView(filters).getElement());
 renderElement(siteMainElement, new SortMenuView(generateSortMethods(films)).getElement());
-renderElement(siteMainElement, new FilmsView().getElement());
+renderElement(siteMainElement, new FilmsListView().getElement());
 
 const filmsListElement = siteMainElement.querySelector('.films-list');
 const filmsListContainerElement = filmsListElement.querySelector('.films-list__container');
