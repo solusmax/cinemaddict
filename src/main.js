@@ -22,7 +22,7 @@ import {
   getRandomInteger,
   isEscEvent,
   renderElement
-} from './utils.js';
+} from './utils';
 
 const FILMS_COUNT = getRandomInteger(15, 20);
 const FILMS_COUNT_PER_STEP = 5;

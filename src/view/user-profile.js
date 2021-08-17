@@ -1,4 +1,4 @@
-import { createElement } from '../utils.js';
+import { createElement } from '../utils';
 
 const createUserProfileTemplate = (userRank) => (
   `<section class="header__profile profile">

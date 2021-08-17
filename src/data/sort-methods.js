@@ -1,6 +1,6 @@
 import {
   getMostRecentDate
-} from '../utils.js';
+} from '../utils';
 
 const getFilmDate = (film) => film.info.releaseDate;
 

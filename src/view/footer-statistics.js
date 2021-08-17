@@ -1,7 +1,7 @@
 import {
   addPluralEnding,
   createElement
-} from '../utils.js';
+} from '../utils';
 
 const createFooterStatisticsTemplate = (filmsCount) => `<p>${filmsCount} movie${addPluralEnding(filmsCount)} inside</p>`;
 

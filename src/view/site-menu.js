@@ -1,7 +1,7 @@
 import {
   createElement,
   setActiveClass
-} from '../utils.js';
+} from '../utils';
 
 const CONTROL_ACTIVE_STATE_CLASS_NAME = 'main-navigation__item--active';
 

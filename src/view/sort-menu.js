@@ -1,7 +1,7 @@
 import {
   createElement,
   setActiveClass
-} from '../utils.js';
+} from '../utils';
 
 const BUTTON_ACTIVE_STATE_CLASS_NAME = 'sort__button--active';
 

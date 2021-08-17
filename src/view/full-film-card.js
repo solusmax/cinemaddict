@@ -5,7 +5,7 @@ import {
   humanizeCommentDate,
   humanizeFilmDate,
   setActiveClass
-} from '../utils.js';
+} from '../utils';
 
 const CONTROL_ACTIVE_STATE_CLASS_NAME = 'film-details__control-button--active';
 const CLOSE_BUTTON_CLASS_NAME = 'film-details__close-btn';

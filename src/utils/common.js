@@ -1,38 +1,4 @@
-import dayjs from 'dayjs';
-import dayjsDuration from 'dayjs/plugin/duration';
-import dayjsMinMax from 'dayjs/plugin/minMax';
-import dayjsRelativeTime from 'dayjs/plugin/relativeTime';
-import {
-  MINUTES_IN_ONE_DAY,
-  RANDOM_SENTENCES
-} from './constants.js';
-
-dayjs.extend(dayjsDuration);
-dayjs.extend(dayjsMinMax);
-dayjs.extend(dayjsRelativeTime);
-
-export const RenderPosition = {
-  AFTERBEGIN: 'afterbegin',
-  BEFOREEND: 'beforeend',
-};
-
-export const renderElement = (container, element, position = RenderPosition.BEFOREEND) => {
-  switch (position) {
-    case RenderPosition.AFTERBEGIN:
-      container.prepend(element);
-      break;
-    case RenderPosition.BEFOREEND:
-      container.append(element);
-      break;
-  }
-};
-
-export const createElement = (template) => {
-  const newElement = document.createElement('div');
-  newElement.innerHTML = template;
-
-  return newElement.firstChild;
-};
+import { RANDOM_SENTENCES } from '../constants.js';
 
 export const getRandomInteger = (min = 0, max = 1) => {
   const roundedMin = Math.ceil(min);
@@ -74,10 +40,6 @@ export const getRandomBoolean = () => Boolean(Math.random() < 0.5);
 
 export const generateRandomText = (minSentences = 1, maxSentences = RANDOM_SENTENCES.length) => getRandomItems(RANDOM_SENTENCES, minSentences, maxSentences).join(' ');
 
-export const getRandomDateFromPast = (maxDaysAgo) => dayjs()
-  .subtract(getRandomInteger(0, maxDaysAgo - 1), 'day')
-  .subtract(getRandomInteger(0, MINUTES_IN_ONE_DAY), 'minute').toISOString();
-
 export const createRandomUniqueIdGenerator = (maxId) => {
   const usedIds = [];
 
@@ -112,22 +74,7 @@ export const createConsistentUniqueIdGenerator = () => {
   };
 };
 
-export const getFormattedDuration = (durationInMinutes) => {
-  const duration = dayjs.duration(durationInMinutes, 'minutes');
-
-  return `${duration.hours() ? `${duration.hours()  }h ` : ''}${duration.minutes()}m`;
-};
-
 export const addPluralEnding = (count) => count !== 1 ? 's' : '';
-
-export const getMostRecentDate = (...dates) => dayjs.max([...dates.map((date) => dayjs(date))]).toISOString();
-
-export const humanizeFilmDate = (date) => dayjs(date).format('D MMMM YYYY');
-
-export const humanizeCommentDate = (date) => dayjs().to(date);
-
-export const getYearFromDate = (date) => dayjs(date).year();
 
 export const setActiveClass = (activityCondition, className) => activityCondition ? className : '';
 
-export const isEscEvent = (evt) => evt.key === 'Escape' || evt.key === 'Esc';

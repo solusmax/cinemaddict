@@ -4,7 +4,7 @@ import {
   getFormattedDuration,
   getYearFromDate,
   setActiveClass
-} from '../utils.js';
+} from '../utils';
 
 const MAX_LETTERS_IN_SHORT_DESCRIPTION = 140;
 
