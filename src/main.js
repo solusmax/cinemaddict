@@ -21,6 +21,7 @@ import UserProfileView from './view/user-profile.js';
 import {
   getRandomInteger,
   isEscEvent,
+  removeElement,
   renderElement
 } from './utils';
 
@@ -39,10 +40,10 @@ const siteHeaderElement = document.querySelector('.header');
 const siteFooterElement = document.querySelector('.footer');
 const siteMainElement = document.querySelector('.main');
 
-renderElement(siteHeaderElement, new UserProfileView(userRank).getElement());
-renderElement(siteMainElement, new SiteMenuView(filters).getElement());
-renderElement(siteMainElement, new SortMenuView(generateSortMethods(films)).getElement());
-renderElement(siteMainElement, new FilmsListView(films.length).getElement());
+renderElement(siteHeaderElement, new UserProfileView(userRank));
+renderElement(siteMainElement, new SiteMenuView(filters));
+renderElement(siteMainElement, new SortMenuView(generateSortMethods(films)));
+renderElement(siteMainElement, new FilmsListView(films.length));
 
 const filmsListElement = siteMainElement.querySelector('.films-list');
 const filmsListContainerElement = filmsListElement.querySelector('.films-list__container');
@@ -55,8 +56,7 @@ const renderFullFilmCard = (film) => {
   const removeFullFilmCard = () => {
     fullFilmCardComponent.getCloseButtonElement().removeEventListener('click', onFullFilmCardCloseButtonClickWrapper);
     window.removeEventListener('keydown', onFullFilmCardEscKeydownWrapper);
-    fullFilmCardComponent.getElement().remove();
-    fullFilmCardComponent.removeElement();
+    removeElement(fullFilmCardComponent);
     document.body.classList.remove(BODY_NO_SCROLL_CLASS_NAME);
   };
 
@@ -65,7 +65,7 @@ const renderFullFilmCard = (film) => {
   }
 
   fullFilmCardComponent.setFilm(film);
-  renderElement(document.body, fullFilmCardComponent.getElement());
+  renderElement(document.body, fullFilmCardComponent);
   document.body.classList.add(BODY_NO_SCROLL_CLASS_NAME);
 
   const onFullFilmCardCloseButtonClick = (evt) => {
@@ -111,7 +111,7 @@ const renderFilmCard = (container, film) => {
   filmCardPosterElement.addEventListener('click', onfilmCardPosterClick);
   filmCardCommentsLinkElement.addEventListener('click', onfilmCardCommentsLinkClick);
 
-  renderElement(container, filmComponent.getElement());
+  renderElement(container, filmComponent);
 };
 
 const renderFilmCards = () => {
@@ -124,7 +124,7 @@ const renderFilmCards = () => {
 
     const showMoreButtonComponent = new ShowMoreButtonView;
 
-    renderElement(filmsListElement, showMoreButtonComponent.getElement());
+    renderElement(filmsListElement, showMoreButtonComponent);
 
     const onShowMoreButtonClick = (evt) => {
       evt.preventDefault();
@@ -137,8 +137,7 @@ const renderFilmCards = () => {
 
       if (shownFilmsCount >= films.length) {
         showMoreButtonComponent.getElement().removeEventListener('click', onShowMoreButtonClick);
-        showMoreButtonComponent.getElement().remove();
-        showMoreButtonComponent.removeElement();
+        removeElement(showMoreButtonComponent);
       }
     };
 
@@ -167,4 +166,4 @@ if (films.length > 0) {
 }
 
 const footerStatisticsElement = siteFooterElement.querySelector('.footer__statistics');
-renderElement(footerStatisticsElement, new FooterStatisticsView(films.length).getElement());
+renderElement(footerStatisticsElement, new FooterStatisticsView(films.length));
