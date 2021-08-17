@@ -1,6 +1,6 @@
+import AbstractView from './abstract';
 import {
   addPluralEnding,
-  createElement,
   getFormattedDuration,
   humanizeCommentDate,
   humanizeFilmDate,
@@ -165,9 +165,10 @@ const createFullFilmCardTemplate = (film, comments, emojis) => {
   </section>`;
 };
 
-export default class FullFilmCard {
+export default class FullFilmCard extends AbstractView {
   constructor(film, comments, emojis) {
-    this._element = null;
+    super();
+
     this._film = film;
     this._comments = comments;
     this._emojis = emojis;
@@ -175,18 +176,6 @@ export default class FullFilmCard {
 
   getTemplate() {
     return createFullFilmCardTemplate(this._film, this._comments, this._emojis);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 
   setFilm(newFilm) {

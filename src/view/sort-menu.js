@@ -1,7 +1,5 @@
-import {
-  createElement,
-  setActiveClass
-} from '../utils';
+import AbstractView from './abstract';
+import { setActiveClass } from '../utils';
 
 const BUTTON_ACTIVE_STATE_CLASS_NAME = 'sort__button--active';
 
@@ -17,25 +15,14 @@ const createSortMenuTemplate = (sortMethods) => (
   </ul>`
 );
 
-export default class SortMenu {
+export default class SortMenu extends AbstractView {
   constructor(sortMethods) {
-    this._element = null;
+    super();
+
     this._sortMethods = sortMethods;
   }
 
   getTemplate() {
     return createSortMenuTemplate(this._sortMethods);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }
