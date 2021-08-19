@@ -1,7 +1,5 @@
-import {
-  createElement,
-  setActiveClass
-} from '../utils.js';
+import AbstractView from './abstract';
+import { setActiveClass } from '../utils';
 
 const CONTROL_ACTIVE_STATE_CLASS_NAME = 'main-navigation__item--active';
 
@@ -22,25 +20,14 @@ const createSiteMenuTemplate = (filters) => (
     </nav>`
 );
 
-export default class SiteMenu {
+export default class SiteMenu extends AbstractView {
   constructor(filters) {
-    this._element = null;
+    super();
+
     this._filters = filters;
   }
 
   getTemplate() {
     return createSiteMenuTemplate(this._filters);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

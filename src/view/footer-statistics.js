@@ -1,29 +1,16 @@
-import {
-  addPluralEnding,
-  createElement
-} from '../utils.js';
+import AbstractView from './abstract';
+import { addPluralEnding } from '../utils';
 
 const createFooterStatisticsTemplate = (filmsCount) => `<p>${filmsCount} movie${addPluralEnding(filmsCount)} inside</p>`;
 
-export default class FooterStatistics {
+export default class FooterStatistics extends AbstractView {
   constructor(filmsCount) {
-    this._element = null;
+    super();
+
     this._filmsCount = filmsCount;
   }
 
   getTemplate() {
     return createFooterStatisticsTemplate(this._filmsCount);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

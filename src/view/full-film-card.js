@@ -1,14 +1,16 @@
+import AbstractView from './abstract';
 import {
   addPluralEnding,
-  createElement,
   getFormattedDuration,
   humanizeCommentDate,
   humanizeFilmDate,
   setActiveClass
-} from '../utils.js';
+} from '../utils';
 
-const CONTROL_ACTIVE_STATE_CLASS_NAME = 'film-details__control-button--active';
-const CLOSE_BUTTON_CLASS_NAME = 'film-details__close-btn';
+const ClassNames = {
+  CONTROL_ACTIVE_STATE: 'film-details__control-button--active',
+  CLOSE_BUTTON: 'film-details__close-btn',
+};
 
 const createCommentTemplate = (comments, id) => {
   const currentComment = comments.find((comment) => comment.id === id);
@@ -75,7 +77,7 @@ const createFullFilmCardTemplate = (film, comments, emojis) => {
     <form class="film-details__inner" action="" method="get">
       <div class="film-details__top-container">
         <div class="film-details__close">
-          <button class="${CLOSE_BUTTON_CLASS_NAME}" type="button">close</button>
+          <button class="${ClassNames.CLOSE_BUTTON}" type="button">close</button>
         </div>
         <div class="film-details__info-wrap">
           <div class="film-details__poster">
@@ -134,9 +136,9 @@ const createFullFilmCardTemplate = (film, comments, emojis) => {
         </div>
 
         <section class="film-details__controls">
-          <button type="button" class="film-details__control-button film-details__control-button--watchlist ${setActiveClass(isOnWatchlist, CONTROL_ACTIVE_STATE_CLASS_NAME)}" id="watchlist" name="watchlist">Add to watchlist</button>
-          <button type="button" class="film-details__control-button film-details__control-button--watched ${setActiveClass(isWatched, CONTROL_ACTIVE_STATE_CLASS_NAME)}" id="watched" name="watched">Already watched</button>
-          <button type="button" class="film-details__control-button film-details__control-button--favorite ${setActiveClass(isFavorite, CONTROL_ACTIVE_STATE_CLASS_NAME)}" id="favorite" name="favorite">Add to favorites</button>
+          <button type="button" class="film-details__control-button film-details__control-button--watchlist ${setActiveClass(isOnWatchlist, ClassNames.CONTROL_ACTIVE_STATE)}" id="watchlist" name="watchlist">Add to watchlist</button>
+          <button type="button" class="film-details__control-button film-details__control-button--watched ${setActiveClass(isWatched, ClassNames.CONTROL_ACTIVE_STATE)}" id="watched" name="watched">Already watched</button>
+          <button type="button" class="film-details__control-button film-details__control-button--favorite ${setActiveClass(isFavorite, ClassNames.CONTROL_ACTIVE_STATE)}" id="favorite" name="favorite">Add to favorites</button>
         </section>
       </div>
 
@@ -165,39 +167,45 @@ const createFullFilmCardTemplate = (film, comments, emojis) => {
   </section>`;
 };
 
-export default class FullFilmCard {
+export default class FullFilmCard extends AbstractView {
   constructor(film, comments, emojis) {
-    this._element = null;
+    super();
+
     this._film = film;
     this._comments = comments;
     this._emojis = emojis;
+
+    this._onCloseButtonClick = this._onCloseButtonClick.bind(this);
   }
 
   getTemplate() {
     return createFullFilmCardTemplate(this._film, this._comments, this._emojis);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
-  }
-
   setFilm(newFilm) {
     this._film = newFilm;
   }
 
-  isElementRendered() {
-    return Boolean(this._element);
+  _getCloseButtonElement() {
+    return this.getElement().querySelector(`.${ClassNames.CLOSE_BUTTON}`);
   }
 
-  getCloseButtonElement() {
-    return this.getElement().querySelector(`.${CLOSE_BUTTON_CLASS_NAME}`);
+  _onCloseButtonClick(evt) {
+    evt.preventDefault();
+
+    this._callback.closeButtonClick();
+  }
+
+  setCloseButtonClickListener(cb) {
+    this._callback.closeButtonClick = cb;
+    this._getCloseButtonElement().addEventListener('click', this._onCloseButtonClick);
+  }
+
+  removeCloseButtonClickListener() {
+    this._getCloseButtonElement().removeEventListener('click', this._onCloseButtonClick);
+  }
+
+  isElementRendered() {
+    return Boolean(this._element);
   }
 }
