@@ -70,7 +70,7 @@ export default class FilmCard extends AbstractView {
     this._onTitleClick = this._onTitleClick.bind(this);
   }
 
-  getTemplate() {
+  _getTemplate() {
     return createFilmCardTemplate(this._film);
   }
 

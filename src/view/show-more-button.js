@@ -9,7 +9,7 @@ export default class ShowMoreButton extends AbstractView {
     this._onClick = this._onClick.bind(this);
   }
 
-  getTemplate() {
+  _getTemplate() {
     return createShowMoreButtonTemplate();
   }
 

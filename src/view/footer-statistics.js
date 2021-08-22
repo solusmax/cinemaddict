@@ -10,7 +10,7 @@ export default class FooterStatistics extends AbstractView {
     this._filmsCount = filmsCount;
   }
 
-  getTemplate() {
+  _getTemplate() {
     return createFooterStatisticsTemplate(this._filmsCount);
   }
 }

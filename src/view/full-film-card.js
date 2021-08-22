@@ -178,7 +178,7 @@ export default class FullFilmCard extends AbstractView {
     this._onCloseButtonClick = this._onCloseButtonClick.bind(this);
   }
 
-  getTemplate() {
+  _getTemplate() {
     return createFullFilmCardTemplate(this._film, this._comments, this._emojis);
   }
 

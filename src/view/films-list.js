@@ -40,7 +40,7 @@ export default class FilmsList extends AbstractView {
     this._filmsCount = filmsCount;
   }
 
-  getTemplate() {
+  _getTemplate() {
     if (this._filmsCount === 0) {
       return createEmptyFilmsListTemplate();
     }
