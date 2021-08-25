@@ -7,9 +7,38 @@ import {
   setActiveClass
 } from '../utils';
 
+const BLANK_FILM = {
+  id: -1,
+  info: {
+    poster: null,
+    title: '',
+    originalTitle: '',
+    rating: 0,
+    director: '',
+    screenwriters: [],
+    actors: [],
+    releaseDate: '2000-00-00T00:00:00.000Z',
+    duration: 0,
+    releaseCountry: [],
+    genres: [],
+    description: '',
+    ageRating: 0,
+  },
+  comments: [],
+  userMeta: {
+    isWatched: false,
+    isFavorite: false,
+    isOnWatchlist: false,
+    watchingDate: '2000-00-00T00:00:00.000Z',
+  },
+};
+
 const ClassNames = {
   CONTROL_ACTIVE_STATE: 'film-details__control-button--active',
   CLOSE_BUTTON: 'film-details__close-btn',
+  ADD_TO_WATCHLIST_CONTROL: 'film-details__control-button--watchlist',
+  MARK_AS_WATCHED_CONTROL: 'film-details__control-button--watched',
+  MARK_AS_FAVORITE_CONTROL: 'film-details__control-button--favorite',
 };
 
 const createCommentTemplate = (comments, id) => {
@@ -136,9 +165,9 @@ const createFullFilmCardTemplate = (film, comments, emojis) => {
         </div>
 
         <section class="film-details__controls">
-          <button type="button" class="film-details__control-button film-details__control-button--watchlist ${setActiveClass(isOnWatchlist, ClassNames.CONTROL_ACTIVE_STATE)}" id="watchlist" name="watchlist">Add to watchlist</button>
-          <button type="button" class="film-details__control-button film-details__control-button--watched ${setActiveClass(isWatched, ClassNames.CONTROL_ACTIVE_STATE)}" id="watched" name="watched">Already watched</button>
-          <button type="button" class="film-details__control-button film-details__control-button--favorite ${setActiveClass(isFavorite, ClassNames.CONTROL_ACTIVE_STATE)}" id="favorite" name="favorite">Add to favorites</button>
+          <button type="button" class="film-details__control-button ${ClassNames.ADD_TO_WATCHLIST_CONTROL} ${setActiveClass(isOnWatchlist, ClassNames.CONTROL_ACTIVE_STATE)}" id="watchlist" name="watchlist">Add to watchlist</button>
+          <button type="button" class="film-details__control-button ${ClassNames.MARK_AS_WATCHED_CONTROL} ${setActiveClass(isWatched, ClassNames.CONTROL_ACTIVE_STATE)}" id="watched" name="watched">Already watched</button>
+          <button type="button" class="film-details__control-button ${ClassNames.MARK_AS_FAVORITE_CONTROL} ${setActiveClass(isFavorite, ClassNames.CONTROL_ACTIVE_STATE)}" id="favorite" name="favorite">Add to favorites</button>
         </section>
       </div>
 
@@ -171,11 +200,15 @@ export default class FullFilmCard extends AbstractView {
   constructor(film, comments, emojis) {
     super();
 
-    this._film = film;
+    this._film = film ? film : BLANK_FILM;
+    this._filmId = this._film.id;
     this._comments = comments;
     this._emojis = emojis;
 
     this._onCloseButtonClick = this._onCloseButtonClick.bind(this);
+    this._onAddToWatchlistButtonClick = this._onAddToWatchlistButtonClick.bind(this);
+    this._onMarkAsWatchedButtonClick = this._onMarkAsWatchedButtonClick.bind(this);
+    this._onMarkAsFavoriteButtonClick = this._onMarkAsFavoriteButtonClick.bind(this);
   }
 
   _getTemplate() {
@@ -184,11 +217,36 @@ export default class FullFilmCard extends AbstractView {
 
   setFilm(newFilm) {
     this._film = newFilm;
+    this._filmId = this._film.id;
   }
+
+  isElementRendered() {
+    return Boolean(this._element);
+  }
+
+  getFilmId() {
+    return this._filmId;
+  }
+
+  // Геттеры элементов ↓↓↓
 
   _getCloseButtonElement() {
     return this.getElement().querySelector(`.${ClassNames.CLOSE_BUTTON}`);
   }
+
+  _getAddToWatchlistButtonElement() {
+    return this.getElement().querySelector(`.${ClassNames.ADD_TO_WATCHLIST_CONTROL}`);
+  }
+
+  _getMarkAsWatchedButtonElement() {
+    return this.getElement().querySelector(`.${ClassNames.MARK_AS_WATCHED_CONTROL}`);
+  }
+
+  _getMarkAsFavoriteButtonElement() {
+    return this.getElement().querySelector(`.${ClassNames.MARK_AS_FAVORITE_CONTROL}`);
+  }
+
+  // Колбэки для листенеров ↓↓↓
 
   _onCloseButtonClick(evt) {
     evt.preventDefault();
@@ -196,16 +254,58 @@ export default class FullFilmCard extends AbstractView {
     this._callback.closeButtonClick();
   }
 
+  _onAddToWatchlistButtonClick(evt) {
+    evt.preventDefault();
+    this._callback.addToWatchlistButtonClick();
+  }
+
+  _onMarkAsWatchedButtonClick(evt) {
+    evt.preventDefault();
+    this._callback.markAsWatchedButtonClick();
+  }
+
+  _onMarkAsFavoriteButtonClick(evt) {
+    evt.preventDefault();
+    this._callback.markAsFavoriteButtonClick();
+  }
+
+  // Сеттеры листенеров ↓↓↓
+
   setCloseButtonClickListener(cb) {
     this._callback.closeButtonClick = cb;
     this._getCloseButtonElement().addEventListener('click', this._onCloseButtonClick);
   }
 
+  setAddToWatchlistButtonClickListener(cb) {
+    this._callback.addToWatchlistButtonClick = cb;
+    this._getAddToWatchlistButtonElement().addEventListener('click', this._onAddToWatchlistButtonClick);
+  }
+
+  setMarkAsWatchedButtonClickListener(cb) {
+    this._callback.markAsWatchedButtonClick = cb;
+    this._getMarkAsWatchedButtonElement().addEventListener('click', this._onMarkAsWatchedButtonClick);
+  }
+
+  setMarkAsFavoriteButtonClickListener(cb) {
+    this._callback.markAsFavoriteButtonClick = cb;
+    this._getMarkAsFavoriteButtonElement().addEventListener('click', this._onMarkAsFavoriteButtonClick);
+  }
+
+  // Удаляторы листенеров ↓↓↓
+
   removeCloseButtonClickListener() {
     this._getCloseButtonElement().removeEventListener('click', this._onCloseButtonClick);
   }
 
-  isElementRendered() {
-    return Boolean(this._element);
+  removeAddToWatchlistButtonClickListener() {
+    this._getAddToWatchlistButtonElement().removeEventListener('click', this._onAddToWatchlistButtonClick);
+  }
+
+  removeMarkAsWatchedButtonClickListener() {
+    this._getMarkAsWatchedButtonElement().removeEventListener('click', this._onMarkAsWatchedButtonClick);
+  }
+
+  removeMarkAsFavoriteButtonClickListener() {
+    this._getMarkAsFavoriteButtonElement().removeEventListener('click', this._onMarkAsFavoriteButtonClick);
   }
 }
