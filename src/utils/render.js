@@ -42,3 +42,24 @@ export const createElement = (template) => {
 
   return newElement.firstChild;
 };
+
+export const replaceElement = (newChild, oldChild) => {
+  let currentNewChild = newChild;
+  let currentOldChild = oldChild;
+
+  if (currentNewChild instanceof Abstract) {
+    currentNewChild = currentNewChild.getElement();
+  }
+
+  if (currentOldChild instanceof Abstract) {
+    currentOldChild = currentOldChild.getElement();
+  }
+
+  const parent = currentOldChild.parentElement;
+
+  if (parent === null || currentNewChild === null || currentOldChild === null) {
+    throw new Error('Can\'t replace unexisting elements');
+  }
+
+  parent.replaceChild(currentNewChild, currentOldChild);
+};

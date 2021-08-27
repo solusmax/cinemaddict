@@ -1,35 +1,48 @@
 import AbstractView from './abstract';
 
-const createFilmsListTemplate = () => (
-  `<section class="films">
-    <section class="films-list">
-      <h2 class="films-list__title visually-hidden">All movies. Upcoming</h2>
+const ContainerIds = {
+  MAIN: 'films-list-main',
+  TOP_RATED: 'films-list-top-rated',
+  MOST_COMMENTED: 'films-list-most-commented',
+};
 
-      <div class="films-list__container">
-      </div>
-    </section>
+const ClassNames = {
+  FILMS_LIST:'films-list',
+  FILMS_LIST_CONTAINER:'films-list__container',
+};
 
-    <section class="films-list films-list--extra" id="films-list-top-rated">
-      <h2 class="films-list__title">Top rated</h2>
+const createMainListInnerTemplate = () => (
+  `<h2 class="films-list__title visually-hidden">All movies. Upcoming</h2>
 
-      <div class="films-list__container">
-      </div>
-    </section>
+  <div class="${ClassNames.FILMS_LIST_CONTAINER}">
+  </div>`
+);
 
-    <section class="films-list films-list--extra" id="films-list-most-commented">
-      <h2 class="films-list__title">Most commented</h2>
+const createEmptyMainListInnerTemplate = () => '<h2 class="films-list__title">There are no movies in our database</h2>';
 
-      <div class="films-list__container">
-      </div>
-    </section>
+const createExtraListsTemplate = () => (
+  `<section class="${ClassNames.FILMS_LIST} films-list--extra" id="${ContainerIds.TOP_RATED}">
+    <h2 class="films-list__title">Top rated</h2>
+
+    <div class="${ClassNames.FILMS_LIST_CONTAINER}">
+    </div>
+  </section>
+
+  <section class="${ClassNames.FILMS_LIST} films-list--extra" id="${ContainerIds.MOST_COMMENTED}">
+    <h2 class="films-list__title">Most commented</h2>
+
+    <div class="${ClassNames.FILMS_LIST_CONTAINER}">
+    </div>
   </section>`
 );
 
-const createEmptyFilmsListTemplate = () => (
+const createFilmsListTemplate = (isEmpty) => (
   `<section class="films">
-    <section class="films-list">
-      <h2 class="films-list__title">There are no movies in our database</h2>
+    <section class="${ClassNames.FILMS_LIST}" id="${ContainerIds.MAIN}">
+      ${isEmpty ? createEmptyMainListInnerTemplate() : createMainListInnerTemplate()}
     </section>
+
+    ${isEmpty ? '' : createExtraListsTemplate()}
   </section>`
 );
 
@@ -40,11 +53,23 @@ export default class FilmsList extends AbstractView {
     this._filmsCount = filmsCount;
   }
 
-  getTemplate() {
-    if (this._filmsCount === 0) {
-      return createEmptyFilmsListTemplate();
-    }
+  _getTemplate() {
+    return createFilmsListTemplate(this._filmsCount === 0);
+  }
 
-    return createFilmsListTemplate();
+  getMainListElement() {
+    return this.getElement().querySelector(`#${ContainerIds.MAIN}`);
+  }
+
+  getMainListContainerElement() {
+    return this.getMainListElement().querySelector(`.${ClassNames.FILMS_LIST_CONTAINER}`);
+  }
+
+  getTopRatedListContainerElement() {
+    return this.getElement().querySelector(`#${ContainerIds.TOP_RATED} .${ClassNames.FILMS_LIST_CONTAINER}`);
+  }
+
+  getMostCommentedListContainerElement() {
+    return this.getElement().querySelector(`#${ContainerIds.MOST_COMMENTED} .${ClassNames.FILMS_LIST_CONTAINER}`);
   }
 }

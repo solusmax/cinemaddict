@@ -22,7 +22,7 @@ export default class SortMenu extends AbstractView {
     this._sortMethods = sortMethods;
   }
 
-  getTemplate() {
+  _getTemplate() {
     return createSortMenuTemplate(this._sortMethods);
   }
 }
