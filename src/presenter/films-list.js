@@ -30,8 +30,11 @@ export default class FilmsList {
     this._renderedFilmCardComponents = [];
 
     this._filmsListComponent = new FilmsListView(this._currentFilms.length);
-    this._fullFilmCardComponent = new FullFilmCardView(null, this._comments, this._emojis);
     this._showMoreButtonComponent = new ShowMoreButtonView();
+
+    if (this._initialFilms.length > 0) {
+      this._fullFilmCardComponent = new FullFilmCardView(this._initialFilms[0], this._comments, this._emojis);
+    }
 
     this._onFullFilmCardEscKeydown = this._onFullFilmCardEscKeydown.bind(this);
     this._handleShowMoreButtonClick = this._handleShowMoreButtonClick.bind(this);

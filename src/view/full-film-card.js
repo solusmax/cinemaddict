@@ -7,32 +7,6 @@ import {
   setActiveClass
 } from '../utils';
 
-const BLANK_FILM = {
-  id: -1,
-  info: {
-    poster: null,
-    title: '',
-    originalTitle: '',
-    rating: 0,
-    director: '',
-    screenwriters: [],
-    actors: [],
-    releaseDate: '2000-00-00T00:00:00.000Z',
-    duration: 0,
-    releaseCountry: [],
-    genres: [],
-    description: '',
-    ageRating: 0,
-  },
-  comments: [],
-  userMeta: {
-    isWatched: false,
-    isFavorite: false,
-    isOnWatchlist: false,
-    watchingDate: '2000-00-00T00:00:00.000Z',
-  },
-};
-
 const ClassNames = {
   CONTROL_ACTIVE_STATE: 'film-details__control-button--active',
   CLOSE_BUTTON: 'film-details__close-btn',
@@ -200,7 +174,7 @@ export default class FullFilmCard extends AbstractView {
   constructor(film, comments, emojis) {
     super();
 
-    this._film = film ? film : BLANK_FILM;
+    this._film = film;
     this._filmId = this._film.id;
     this._comments = comments;
     this._emojis = emojis;
