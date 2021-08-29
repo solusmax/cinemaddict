@@ -4,13 +4,11 @@ import {
   generateComment,
   generateFilm,
   generateFilters,
-  generateSortMethods,
   getUserRank,
   getWatchedFilms
 } from './data';
 import FooterStatisticsView from './view/footer-statistics.js';
 import SiteMenuView from './view/site-menu.js';
-import SortMenuView from './view/sort-menu.js';
 import UserProfileView from './view/user-profile.js';
 import FilmsListPresenter from './presenter/films-list.js';
 import {
@@ -31,7 +29,6 @@ const siteMainElement = document.querySelector('.main');
 
 renderElement(siteHeaderElement, new UserProfileView(userRank));
 renderElement(siteMainElement, new SiteMenuView(filters));
-renderElement(siteMainElement, new SortMenuView(generateSortMethods(films)));
 
 const filmsListPresenter = new FilmsListPresenter(siteMainElement, films, comments, EMOJIS);
 filmsListPresenter.init();

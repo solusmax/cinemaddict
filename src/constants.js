@@ -13,3 +13,9 @@ export const RANDOM_SENTENCES = [
 ];
 
 export const MINUTES_IN_ONE_DAY = 1440;
+
+export const SortMethods = {
+  DEFAULT: 'default',
+  DATE: 'date',
+  RATING: 'rating',
+};

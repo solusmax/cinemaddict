@@ -1,5 +1,6 @@
 import {
   getFilmsSortedByComments,
+  getFilmsSortedByDate,
   getFilmsSortedByRating,
   isEscEvent,
   removeElement,
@@ -7,10 +8,12 @@ import {
   replaceElement,
   updateFilmData
 } from '../utils';
+import { SortMethods } from '../constants.js';
 import FilmCardView from '../view/film-card.js';
 import FilmsListView from '../view/films-list.js';
 import FullFilmCardView from '../view/full-film-card.js';
 import ShowMoreButtonView from '../view/show-more-button.js';
+import SortMenuView from '../view/sort-menu.js';
 
 const BODY_NO_SCROLL_CLASS_NAME = 'hide-overflow';
 
@@ -26,11 +29,13 @@ export default class FilmsList {
     this._comments = comments.slice();
     this._emojis = emojis.slice();
 
-    this._renderedFilmCardsCount = 0;
+    this._renderedMainFilmCardsCount = 0;
+    this._currentSortMethod = SortMethods.DEFAULT;
     this._renderedFilmCardComponents = [];
 
     this._filmsListComponent = new FilmsListView(this._currentFilms.length);
     this._showMoreButtonComponent = new ShowMoreButtonView();
+    this._sortMenuComponent = new SortMenuView();
 
     if (this._initialFilms.length > 0) {
       this._fullFilmCardComponent = new FullFilmCardView(this._initialFilms[0], this._comments, this._emojis);
@@ -38,15 +43,68 @@ export default class FilmsList {
 
     this._onFullFilmCardEscKeydown = this._onFullFilmCardEscKeydown.bind(this);
     this._handleShowMoreButtonClick = this._handleShowMoreButtonClick.bind(this);
+    this._handleSortMethodClick = this._handleSortMethodClick.bind(this);
   }
 
   init() {
+    this._renderSortMenu();
     renderElement(this._filmsListContainer, this._filmsListComponent);
 
     if (this._currentFilms.length > 0) {
-      this._renderFilmCards();
-      this._renderExtraFilmCards();
+      this._renderMainFilmsList();
+      this._renderExtraFilmsLists();
     }
+  }
+
+  _sortFilms(sortMethod) {
+    switch (sortMethod) {
+      case SortMethods.DATE:
+        this._currentFilms = getFilmsSortedByDate(this._currentFilms);
+        break;
+      case SortMethods.RATING:
+        this._currentFilms = getFilmsSortedByRating(this._currentFilms);
+        break;
+      default:
+        this._currentFilms = this._initialFilms;
+    }
+
+    this._currentSortMethod = sortMethod;
+  }
+
+  _handleSortMethodClick(sortMethod) {
+    if (sortMethod === this._currentSortMethod) {
+      return;
+    }
+
+    this._sortFilms(sortMethod);
+    this._clearMainFilmsList();
+    this._renderMainFilmsList();
+  }
+
+  _renderSortMenu() {
+    renderElement(this._filmsListContainer, this._sortMenuComponent);
+    this._sortMenuComponent.setSortButtonClickListener(this._handleSortMethodClick);
+  }
+
+  _clearMainFilmsList() {
+    const renderedComponentsToRemoveIndexes = [];
+
+    this._renderedFilmCardComponents.forEach((filmCardComponent, index) => {
+      const isFilmCardComponentInMainList = filmCardComponent.getElement().parentElement.parentElement.id === this._filmsListComponent.getMainListContainerId();
+
+      if (isFilmCardComponentInMainList) {
+        this._removeFilmCardComponentListeners(filmCardComponent);
+        removeElement(filmCardComponent);
+        renderedComponentsToRemoveIndexes.push(index);
+      }
+    });
+
+    renderedComponentsToRemoveIndexes.forEach((index) => this._renderedFilmCardComponents[index] = null);
+    this._renderedFilmCardComponents = this._renderedFilmCardComponents.filter((el) => el);
+
+    this._renderedMainFilmCardsCount = 0;
+
+    removeElement(this._showMoreButtonComponent);
   }
 
   _handleAddToWatchlishButtonClick(film) {
@@ -198,12 +256,12 @@ export default class FilmsList {
 
   _handleShowMoreButtonClick() {
     this._currentFilms
-      .slice(this._renderedFilmCardsCount, this._renderedFilmCardsCount + FILMS_COUNT_PER_STEP)
+      .slice(this._renderedMainFilmCardsCount, this._renderedMainFilmCardsCount + FILMS_COUNT_PER_STEP)
       .forEach((film) => this._renderFilmCard(this._filmsListComponent.getMainListContainerElement(), film));
 
-    this._renderedFilmCardsCount += FILMS_COUNT_PER_STEP;
+    this._renderedMainFilmCardsCount += FILMS_COUNT_PER_STEP;
 
-    if (this._renderedFilmCardsCount >= this._currentFilms.length) {
+    if (this._renderedMainFilmCardsCount >= this._currentFilms.length) {
       this._showMoreButtonComponent.removeClickListener();
       removeElement(this._showMoreButtonComponent);
     }
@@ -214,19 +272,19 @@ export default class FilmsList {
     this._showMoreButtonComponent.setClickListener(this._handleShowMoreButtonClick);
   }
 
-  _renderFilmCards() {
+  _renderMainFilmsList() {
     for (let i = 0; i < Math.min(this._currentFilms.length, FILMS_COUNT_PER_STEP); i++) {
       this._renderFilmCard(this._filmsListComponent.getMainListContainerElement(), this._currentFilms[i]);
     }
 
-    this._renderedFilmCardsCount += FILMS_COUNT_PER_STEP;
+    this._renderedMainFilmCardsCount += FILMS_COUNT_PER_STEP;
 
-    if (this._currentFilms.length > this._renderedFilmCardsCount) {
+    if (this._currentFilms.length > this._renderedMainFilmCardsCount) {
       this._renderShowMoreButton();
     }
   }
 
-  _renderExtraFilmCards() {
+  _renderExtraFilmsLists() {
     getFilmsSortedByComments(this._currentFilms)
       .slice(0, EXTRA_FILMS_COUNT)
       .forEach((film) => this._renderFilmCard(this._filmsListComponent.getMostCommentedListContainerElement(), film));
