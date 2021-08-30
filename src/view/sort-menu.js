@@ -1,28 +1,44 @@
 import AbstractView from './abstract';
 import { setActiveClass } from '../utils';
+import { SortMethods } from '../constants.js';
 
 const BUTTON_ACTIVE_STATE_CLASS_NAME = 'sort__button--active';
+const DEFAULT_SORT_METHOD_NAME = 'default';
 
-const createSortMethodTemplate = (sortMethods, { id: sortMethodId, title: sortMethodTitle }) => {
-  const isDefaultSortMethod = sortMethodId === sortMethods[0].id;
+const createSortMethodTemplate = (sortMethodName) => `<li><a href="#" class="sort__button ${setActiveClass(sortMethodName === DEFAULT_SORT_METHOD_NAME, BUTTON_ACTIVE_STATE_CLASS_NAME)}" data-sort-method="${sortMethodName}">Sort by ${sortMethodName}</a></li>`;
 
-  return `<li><a href="#${sortMethodId}" class="sort__button ${setActiveClass(isDefaultSortMethod, BUTTON_ACTIVE_STATE_CLASS_NAME)}">${sortMethodTitle}</a></li>`;
-};
-
-const createSortMenuTemplate = (sortMethods) => (
+const createSortMenuTemplate = () => (
   `<ul class="sort">
-    ${sortMethods.map((sortMethod) => createSortMethodTemplate(sortMethods, sortMethod)).join(' ')}
+    ${Object.values(SortMethods).map((sortMethodName) => createSortMethodTemplate(sortMethodName)).join(' ')}
   </ul>`
 );
 
 export default class SortMenu extends AbstractView {
-  constructor(sortMethods) {
+  constructor() {
     super();
 
-    this._sortMethods = sortMethods;
+    this._onSortButtonClick = this._onSortButtonClick.bind(this);
   }
 
   _getTemplate() {
-    return createSortMenuTemplate(this._sortMethods);
+    return createSortMenuTemplate();
+  }
+
+  _onSortButtonClick(evt) {
+    if (evt.target.tagName !== 'A') {
+      return;
+    }
+
+    evt.preventDefault();
+
+    this.getElement().querySelector(`.${BUTTON_ACTIVE_STATE_CLASS_NAME}`).classList.remove(BUTTON_ACTIVE_STATE_CLASS_NAME);
+    evt.target.classList.add(BUTTON_ACTIVE_STATE_CLASS_NAME);
+
+    this._callback.sortButtonClick(evt.target.dataset.sortMethod);
+  }
+
+  setSortButtonClickListener(cb) {
+    this._callback.sortButtonClick = cb;
+    this.getElement().addEventListener('click', this._onSortButtonClick);
   }
 }

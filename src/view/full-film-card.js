@@ -1,4 +1,4 @@
-import AbstractView from './abstract';
+import AbstractFilmCardView from './abstract-film-card';
 import {
   addPluralEnding,
   getFormattedDuration,
@@ -170,19 +170,14 @@ const createFullFilmCardTemplate = (film, comments, emojis) => {
   </section>`;
 };
 
-export default class FullFilmCard extends AbstractView {
+export default class FullFilmCard extends AbstractFilmCardView {
   constructor(film, comments, emojis) {
-    super();
+    super(film);
 
-    this._film = film;
-    this._filmId = this._film.id;
     this._comments = comments;
     this._emojis = emojis;
 
     this._onCloseButtonClick = this._onCloseButtonClick.bind(this);
-    this._onAddToWatchlistButtonClick = this._onAddToWatchlistButtonClick.bind(this);
-    this._onMarkAsWatchedButtonClick = this._onMarkAsWatchedButtonClick.bind(this);
-    this._onMarkAsFavoriteButtonClick = this._onMarkAsFavoriteButtonClick.bind(this);
   }
 
   _getTemplate() {
@@ -198,16 +193,6 @@ export default class FullFilmCard extends AbstractView {
     return Boolean(this._element);
   }
 
-  getFilmId() {
-    return this._filmId;
-  }
-
-  // Геттеры элементов ↓↓↓
-
-  _getCloseButtonElement() {
-    return this.getElement().querySelector(`.${ClassNames.CLOSE_BUTTON}`);
-  }
-
   _getAddToWatchlistButtonElement() {
     return this.getElement().querySelector(`.${ClassNames.ADD_TO_WATCHLIST_CONTROL}`);
   }
@@ -220,7 +205,9 @@ export default class FullFilmCard extends AbstractView {
     return this.getElement().querySelector(`.${ClassNames.MARK_AS_FAVORITE_CONTROL}`);
   }
 
-  // Колбэки для листенеров ↓↓↓
+  _getCloseButtonElement() {
+    return this.getElement().querySelector(`.${ClassNames.CLOSE_BUTTON}`);
+  }
 
   _onCloseButtonClick(evt) {
     evt.preventDefault();
@@ -228,58 +215,12 @@ export default class FullFilmCard extends AbstractView {
     this._callback.closeButtonClick();
   }
 
-  _onAddToWatchlistButtonClick(evt) {
-    evt.preventDefault();
-    this._callback.addToWatchlistButtonClick();
-  }
-
-  _onMarkAsWatchedButtonClick(evt) {
-    evt.preventDefault();
-    this._callback.markAsWatchedButtonClick();
-  }
-
-  _onMarkAsFavoriteButtonClick(evt) {
-    evt.preventDefault();
-    this._callback.markAsFavoriteButtonClick();
-  }
-
-  // Сеттеры листенеров ↓↓↓
-
   setCloseButtonClickListener(cb) {
     this._callback.closeButtonClick = cb;
     this._getCloseButtonElement().addEventListener('click', this._onCloseButtonClick);
   }
 
-  setAddToWatchlistButtonClickListener(cb) {
-    this._callback.addToWatchlistButtonClick = cb;
-    this._getAddToWatchlistButtonElement().addEventListener('click', this._onAddToWatchlistButtonClick);
-  }
-
-  setMarkAsWatchedButtonClickListener(cb) {
-    this._callback.markAsWatchedButtonClick = cb;
-    this._getMarkAsWatchedButtonElement().addEventListener('click', this._onMarkAsWatchedButtonClick);
-  }
-
-  setMarkAsFavoriteButtonClickListener(cb) {
-    this._callback.markAsFavoriteButtonClick = cb;
-    this._getMarkAsFavoriteButtonElement().addEventListener('click', this._onMarkAsFavoriteButtonClick);
-  }
-
-  // Удаляторы листенеров ↓↓↓
-
   removeCloseButtonClickListener() {
     this._getCloseButtonElement().removeEventListener('click', this._onCloseButtonClick);
-  }
-
-  removeAddToWatchlistButtonClickListener() {
-    this._getAddToWatchlistButtonElement().removeEventListener('click', this._onAddToWatchlistButtonClick);
-  }
-
-  removeMarkAsWatchedButtonClickListener() {
-    this._getMarkAsWatchedButtonElement().removeEventListener('click', this._onMarkAsWatchedButtonClick);
-  }
-
-  removeMarkAsFavoriteButtonClickListener() {
-    this._getMarkAsFavoriteButtonElement().removeEventListener('click', this._onMarkAsFavoriteButtonClick);
   }
 }

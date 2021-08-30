@@ -53,6 +53,10 @@ export default class FilmsList extends AbstractView {
     this._filmsCount = filmsCount;
   }
 
+  getMainListContainerId() {
+    return ContainerIds.MAIN;
+  }
+
   _getTemplate() {
     return createFilmsListTemplate(this._filmsCount === 0);
   }

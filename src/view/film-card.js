@@ -1,4 +1,4 @@
-import AbstractView from './abstract.js';
+import AbstractFilmCardView from './abstract-film-card';
 import {
   addPluralEnding,
   getFormattedDuration,
@@ -62,42 +62,20 @@ const createFilmCardTemplate = (film) => {
   );
 };
 
-export default class FilmCard extends AbstractView {
+export default class FilmCard extends AbstractFilmCardView {
   constructor(film) {
-    super();
-
-    this._film = film;
-    this._filmId = this._film.id;
+    super(film);
 
     this._onCommentsLinkClick = this._onCommentsLinkClick.bind(this);
     this._onPosterClick = this._onPosterClick.bind(this);
     this._onTitleClick = this._onTitleClick.bind(this);
-    this._onAddToWatchlistButtonClick = this._onAddToWatchlistButtonClick.bind(this);
-    this._onMarkAsWatchedButtonClick = this._onMarkAsWatchedButtonClick.bind(this);
-    this._onMarkAsFavoriteButtonClick = this._onMarkAsFavoriteButtonClick.bind(this);
   }
 
   _getTemplate() {
     return createFilmCardTemplate(this._film);
   }
 
-  getFilmId() {
-    return this._filmId;
-  }
-
   // Геттеры элементов ↓↓↓
-
-  _getCommentsLinkElement() {
-    return this.getElement().querySelector(`.${ClassNames.COMMENTS_LINK}`);
-  }
-
-  _getPosterElement() {
-    return this.getElement().querySelector(`.${ClassNames.POSTER}`);
-  }
-
-  _getTitleElement() {
-    return this.getElement().querySelector(`.${ClassNames.TITLE}`);
-  }
 
   _getAddToWatchlistButtonElement() {
     return this.getElement().querySelector(`.${ClassNames.ADD_TO_WATCHLIST_CONTROL}`);
@@ -109,6 +87,18 @@ export default class FilmCard extends AbstractView {
 
   _getMarkAsFavoriteButtonElement() {
     return this.getElement().querySelector(`.${ClassNames.MARK_AS_FAVORITE_CONTROL}`);
+  }
+
+  _getCommentsLinkElement() {
+    return this.getElement().querySelector(`.${ClassNames.COMMENTS_LINK}`);
+  }
+
+  _getPosterElement() {
+    return this.getElement().querySelector(`.${ClassNames.POSTER}`);
+  }
+
+  _getTitleElement() {
+    return this.getElement().querySelector(`.${ClassNames.TITLE}`);
   }
 
   // Колбэки листенеров ↓↓↓
@@ -125,24 +115,6 @@ export default class FilmCard extends AbstractView {
 
   _onTitleClick() {
     this._callback.titleClick();
-  }
-
-  _onAddToWatchlistButtonClick(evt) {
-    evt.preventDefault();
-
-    this._callback.addToWatchlistButtonClick();
-  }
-
-  _onMarkAsWatchedButtonClick(evt) {
-    evt.preventDefault();
-
-    this._callback.markAsWatchedButtonClick();
-  }
-
-  _onMarkAsFavoriteButtonClick(evt) {
-    evt.preventDefault();
-
-    this._callback.markAsFavoriteButtonClick();
   }
 
   // Сеттеры листенеров ↓↓↓
@@ -162,21 +134,6 @@ export default class FilmCard extends AbstractView {
     this._getTitleElement().addEventListener('click', this._onTitleClick);
   }
 
-  setAddToWatchlistButtonClickListener(cb) {
-    this._callback.addToWatchlistButtonClick = cb;
-    this._getAddToWatchlistButtonElement().addEventListener('click', this._onAddToWatchlistButtonClick);
-  }
-
-  setMarkAsWatchedButtonClickListener(cb) {
-    this._callback.markAsWatchedButtonClick = cb;
-    this._getMarkAsWatchedButtonElement().addEventListener('click', this._onMarkAsWatchedButtonClick);
-  }
-
-  setMarkAsFavoriteButtonClickListener(cb) {
-    this._callback.markAsFavoriteButtonClick = cb;
-    this._getMarkAsFavoriteButtonElement().addEventListener('click', this._onMarkAsFavoriteButtonClick);
-  }
-
   // Удаляторы листенеров ↓↓↓
 
   removeCommentsLinkClickListener() {
@@ -189,17 +146,5 @@ export default class FilmCard extends AbstractView {
 
   removeTitleClickListener() {
     this._getTitleElement().removeEventListener('click', this._onTitleClick);
-  }
-
-  removeAddToWatchlistButtonClickListener() {
-    this._getAddToWatchlistButtonElement().removeEventListener('click', this._onAddToWatchlistButtonClick);
-  }
-
-  removeMarkAsWatchedButtonClickListener() {
-    this._getMarkAsWatchedButtonElement().removeEventListener('click', this._onMarkAsWatchedButtonClick);
-  }
-
-  removeMarkAsFavoriteButtonClickListener() {
-    this._getMarkAsFavoriteButtonElement().removeEventListener('click', this._onMarkAsFavoriteButtonClick);
   }
 }
