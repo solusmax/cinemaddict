@@ -87,19 +87,18 @@ export default class FilmsList {
   }
 
   _clearMainFilmsList() {
-    const renderedComponentsToRemoveIndexes = [];
-
-    this._renderedFilmCardComponents.forEach((filmCardComponent, index) => {
+    this._renderedFilmCardComponents = this._renderedFilmCardComponents.map((filmCardComponent) => {
       const isFilmCardComponentInMainList = filmCardComponent.getElement().parentElement.parentElement.id === this._filmsListComponent.getMainListContainerId();
 
       if (isFilmCardComponentInMainList) {
         this._removeFilmCardComponentListeners(filmCardComponent);
         removeElement(filmCardComponent);
-        renderedComponentsToRemoveIndexes.push(index);
+        return null;
       }
+
+      return filmCardComponent;
     });
 
-    renderedComponentsToRemoveIndexes.forEach((index) => this._renderedFilmCardComponents[index] = null);
     this._renderedFilmCardComponents = this._renderedFilmCardComponents.filter((el) => el);
 
     this._renderedMainFilmCardsCount = 0;
