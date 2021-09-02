@@ -87,19 +87,18 @@ export default class FilmsList {
   }
 
   _clearMainFilmsList() {
-    const renderedComponentsToRemoveIndexes = [];
-
-    this._renderedFilmCardComponents.forEach((filmCardComponent, index) => {
+    this._renderedFilmCardComponents = this._renderedFilmCardComponents.map((filmCardComponent) => {
       const isFilmCardComponentInMainList = filmCardComponent.getElement().parentElement.parentElement.id === this._filmsListComponent.getMainListContainerId();
 
       if (isFilmCardComponentInMainList) {
         this._removeFilmCardComponentListeners(filmCardComponent);
         removeElement(filmCardComponent);
-        renderedComponentsToRemoveIndexes.push(index);
+        return null;
       }
+
+      return filmCardComponent;
     });
 
-    renderedComponentsToRemoveIndexes.forEach((index) => this._renderedFilmCardComponents[index] = null);
     this._renderedFilmCardComponents = this._renderedFilmCardComponents.filter((el) => el);
 
     this._renderedMainFilmCardsCount = 0;
@@ -186,7 +185,7 @@ export default class FilmsList {
       this._removeFullFilmCard();
     }
 
-    this._fullFilmCardComponent.setFilm(film);
+    this._fullFilmCardComponent.init(film);
     renderElement(document.body, this._fullFilmCardComponent);
     document.body.classList.add(BODY_NO_SCROLL_CLASS_NAME);
 
@@ -205,7 +204,7 @@ export default class FilmsList {
     const newRenderedFilmCardComponents = [];
 
     for (let i = 0; i < this._renderedFilmCardComponents.length; i++) {
-      if (this._renderedFilmCardComponents[i].getFilmId() === updatedFilm.id) {
+      if (this._renderedFilmCardComponents[i].filmId === updatedFilm.id) {
         const newFilmCardComponent = new FilmCardView(updatedFilm);
         this._setFilmCardComponentListeners(newFilmCardComponent, updatedFilm);
 
@@ -221,8 +220,10 @@ export default class FilmsList {
 
     this._renderedFilmCardComponents = [...this._renderedFilmCardComponents, ...newRenderedFilmCardComponents];
 
-    if (this._fullFilmCardComponent.isElementRendered() && this._fullFilmCardComponent.getFilmId() === updatedFilm.id) {
+    if (this._fullFilmCardComponent.isElementRendered() && this._fullFilmCardComponent.filmId === updatedFilm.id) {
+      this._fullFilmCardComponent.saveScrollPosition();
       this._renderFullFilmCard(updatedFilm);
+      this._fullFilmCardComponent.restoreScrollPosition();
     }
   }
 

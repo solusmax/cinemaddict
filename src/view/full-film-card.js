@@ -13,6 +13,8 @@ const ClassNames = {
   ADD_TO_WATCHLIST_CONTROL: 'film-details__control-button--watchlist',
   MARK_AS_WATCHED_CONTROL: 'film-details__control-button--watched',
   MARK_AS_FAVORITE_CONTROL: 'film-details__control-button--favorite',
+  EMOJI_LIST: 'film-details__emoji-list',
+  COMMENT_FIELD: 'film-details__comment-input',
 };
 
 const createCommentTemplate = (comments, id) => {
@@ -42,8 +44,10 @@ const createCommentTemplate = (comments, id) => {
   );
 };
 
-const createEmojiTemplate = (emoji) => (
-  `<input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-${emoji}" value="${emoji}">
+const createSelectedEmojiTemplate = (isEmojiSelected, emoji) => isEmojiSelected ? `<img src="images/emoji/${emoji}.png" width="55" height="55" alt="emoji-${emoji}">` : '';
+
+const createEmojiTemplate = (emoji, isSelected) => (
+  `<input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-${emoji}" value="${emoji}" ${isSelected ? 'checked' : ''}>
   <label class="film-details__emoji-label" for="emoji-${emoji}">
     <img src="./images/emoji/${emoji}.png" width="30" height="30" alt="emoji">
   </label>`
@@ -74,6 +78,7 @@ const createFullFilmCardTemplate = (film, comments, emojis) => {
       isFavorite,
       isOnWatchlist,
     },
+    newComment,
   } = film;
 
   return `<section class="film-details">
@@ -154,14 +159,16 @@ const createFullFilmCardTemplate = (film, comments, emojis) => {
           </ul>
 
           <div class="film-details__new-comment">
-            <div class="film-details__add-emoji-label"></div>
+            <div class="film-details__add-emoji-label">
+              ${createSelectedEmojiTemplate(newComment.isEmojiSelected, newComment.emoji)}
+            </div>
 
             <label class="film-details__comment-label">
-              <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"></textarea>
+              <textarea class="${ClassNames.COMMENT_FIELD}" placeholder="Select reaction below and write comment here" name="comment">${newComment.text}</textarea>
             </label>
 
-            <div class="film-details__emoji-list">
-              ${emojis.map((emoji) => createEmojiTemplate(emoji)).join(' ')}
+            <div class="${ClassNames.EMOJI_LIST}">
+              ${emojis.map((emoji) => createEmojiTemplate(emoji, emoji === newComment.emoji)).join(' ')}
             </div>
           </div>
         </section>
@@ -174,24 +181,57 @@ export default class FullFilmCard extends AbstractFilmCardView {
   constructor(film, comments, emojis) {
     super(film);
 
+    this._data = FullFilmCard.parseFilmToData(this._film);
+
     this._comments = comments;
     this._emojis = emojis;
 
+    this._scrollPosition = 0;
+
     this._onCloseButtonClick = this._onCloseButtonClick.bind(this);
+    this._onCommentFieldInput = this._onCommentFieldInput.bind(this);
+    this._onEmojiListClick = this._onEmojiListClick.bind(this);
+  }
+
+  init(film) {
+    const isFilmNew = film.id !== this.filmId;
+    const currentNewComment = !isFilmNew
+      ? Object.assign({}, {
+        newComment: this._data.newComment,
+      })
+      : null;
+
+    this._film = film;
+    this.filmId = this._film.id;
+    this._data = FullFilmCard.parseFilmToData(this._film);
+    this._updateData(currentNewComment, false);
+
+    this._setInnerListeners();
   }
 
   _getTemplate() {
-    return createFullFilmCardTemplate(this._film, this._comments, this._emojis);
-  }
-
-  setFilm(newFilm) {
-    this._film = newFilm;
-    this._filmId = this._film.id;
+    return createFullFilmCardTemplate(this._data, this._comments, this._emojis);
   }
 
   isElementRendered() {
     return Boolean(this._element);
   }
+
+  saveScrollPosition() {
+    this._scrollPosition = this.getElement().scrollTop;
+  }
+
+  restoreScrollPosition() {
+    this.getElement().scrollTop = this._scrollPosition;
+  }
+
+  updateElement() {
+    this.saveScrollPosition();
+    super.updateElement();
+    this.restoreScrollPosition();
+  }
+
+  // Геттеры элементов ↓↓↓
 
   _getAddToWatchlistButtonElement() {
     return this.getElement().querySelector(`.${ClassNames.ADD_TO_WATCHLIST_CONTROL}`);
@@ -209,18 +249,131 @@ export default class FullFilmCard extends AbstractFilmCardView {
     return this.getElement().querySelector(`.${ClassNames.CLOSE_BUTTON}`);
   }
 
+  _getCommentFieldElement() {
+    return this.getElement().querySelector(`.${ClassNames.COMMENT_FIELD}`);
+  }
+
+  _getEmojiListElement() {
+    return this.getElement().querySelector(`.${ClassNames.EMOJI_LIST}`);
+  }
+
+  // Колбэки листенеров ↓↓↓
+
   _onCloseButtonClick(evt) {
     evt.preventDefault();
 
     this._callback.closeButtonClick();
   }
 
+  _onCommentFieldInput(evt) {
+    evt.preventDefault();
+
+    this._updateData({
+      newComment: Object.assign(
+        {},
+        this._data.newComment,
+        {
+          text: evt.target.value,
+        },
+      ),
+    }, false);
+  }
+
+  _onEmojiListClick(evt) {
+    if (evt.target.tagName !== 'INPUT') {
+      return;
+    }
+
+    evt.preventDefault();
+
+    const selectedEmoji = evt.target.value;
+
+    if (selectedEmoji === this._data.newComment.emoji) {
+      return;
+    }
+
+    if (!this._data.newComment.isEmojiSelected) {
+      this._updateData({
+        newComment: Object.assign(
+          {},
+          this._data.newComment,
+          {
+            isEmojiSelected: true,
+          },
+        ),
+      }, false);
+    }
+
+    this._updateData({
+      newComment: Object.assign(
+        {},
+        this._data.newComment,
+        {
+          emoji: selectedEmoji,
+        },
+      ),
+    }, true);
+  }
+
+  // Сеттеры листенеров ↓↓↓
+
   setCloseButtonClickListener(cb) {
     this._callback.closeButtonClick = cb;
     this._getCloseButtonElement().addEventListener('click', this._onCloseButtonClick);
   }
 
+  _setCommentFieldInputListener() {
+    this._getCommentFieldElement().addEventListener('input', this._onCommentFieldInput);
+  }
+
+  _setEmojiListClickListener() {
+    this._getEmojiListElement().addEventListener('click', this._onEmojiListClick);
+  }
+
+  // Удаляторы листенеров ↓↓↓
+
   removeCloseButtonClickListener() {
     this._getCloseButtonElement().removeEventListener('click', this._onCloseButtonClick);
+  }
+
+  // =========================
+
+  _setInnerListeners() {
+    this._setEmojiListClickListener();
+    this._setCommentFieldInputListener();
+  }
+
+  _restoreListeners() {
+    this._setInnerListeners();
+
+    this.setAddToWatchlistButtonClickListener(this._callback.addToWatchlistButtonClick);
+    this.setMarkAsWatchedButtonClickListener(this._callback.markAsWatchedButtonClick);
+    this.setMarkAsFavoriteButtonClickListener(this._callback.markAsFavoriteButtonClick);
+    this.setCloseButtonClickListener(this._callback.closeButtonClick);
+  }
+
+  static parseFilmToData(film) {
+    return Object.assign(
+      {},
+      film,
+      {
+        newComment: {
+          text: '',
+          isEmojiSelected: false,
+          emoji: '',
+        },
+      },
+    );
+  }
+
+  static parseDataToFilm(data) {
+    const currentData = Object.assign(
+      {},
+      data,
+    );
+
+    delete currentData.newComment;
+
+    return currentData;
   }
 }
