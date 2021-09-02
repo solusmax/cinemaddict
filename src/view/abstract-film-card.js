@@ -1,6 +1,6 @@
-import AbstractView from './abstract.js';
+import SmartAbstractView from './smart-abstract.js';
 
-export default class AbstractFilmCard extends AbstractView {
+export default class AbstractFilmCard extends SmartAbstractView {
   constructor(film) {
     super();
 
@@ -16,8 +16,12 @@ export default class AbstractFilmCard extends AbstractView {
     this._onMarkAsFavoriteButtonClick = this._onMarkAsFavoriteButtonClick.bind(this);
   }
 
-  getFilmId() {
+  get filmId() {
     return this._filmId;
+  }
+
+  set filmId(id) {
+    this._filmId = id;
   }
 
   // Геттеры элементов ↓↓↓
