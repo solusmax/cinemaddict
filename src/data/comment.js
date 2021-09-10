@@ -26,7 +26,7 @@ export const EMOJIS = [
   'smile',
 ];
 
-const getUniqueCommentId = createConsistentUniqueIdGenerator();
+export const getUniqueCommentId = createConsistentUniqueIdGenerator();
 
 export const generateComment = () => ({
   id: getUniqueCommentId(),

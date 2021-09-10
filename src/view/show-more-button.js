@@ -1,6 +1,8 @@
-import AbstractView from './abstract';
+import AbstractView from './abstract.js';
 
-const createShowMoreButtonTemplate = () => '<button class="films-list__show-more">Show more</button>';
+const SHOW_MORE_BUTTON_CLASS_NAME = 'films-list__show-more';
+
+const createShowMoreButtonTemplate = () => `<button class="${SHOW_MORE_BUTTON_CLASS_NAME}">Show more</button>`;
 
 export default class ShowMoreButton extends AbstractView {
   constructor() {
@@ -11,6 +13,10 @@ export default class ShowMoreButton extends AbstractView {
 
   _getTemplate() {
     return createShowMoreButtonTemplate();
+  }
+
+  isElementRendered() {
+    return Boolean(document.querySelector(`.${SHOW_MORE_BUTTON_CLASS_NAME}`));
   }
 
   _onClick(evt) {

@@ -1,4 +1,4 @@
-import AbstractView from './abstract';
+import AbstractView from './abstract.js';
 
 export default class SmartAbstract extends AbstractView {
   constructor() {

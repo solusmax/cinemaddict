@@ -19,3 +19,23 @@ export const SortMethods = {
   DATE: 'date',
   RATING: 'rating',
 };
+
+export const UserActions = {
+  UPDATE_FILM: 'UPDATE_FILM',
+  ADD_COMMENT: 'ADD_COMMENT',
+  DELETE_COMMENT: 'DELETE_COMMENT',
+};
+
+export const UpdateTypes = {
+  FILM: 'FILM',
+  FILM_AND_EXTRA: 'FILM_AND_EXTRA',
+  FILMS_LIST: 'FILMS_LIST',
+  FILMS_LIST_AND_SORT: 'FILMS_LIST_AND_SORT',
+};
+
+export const FilterTypes = {
+  ALL_FILMS: 'all',
+  WATCHLIST: 'watchlist',
+  HISTORY: 'histoty',
+  FAVORITES: 'favorites',
+};

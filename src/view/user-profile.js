@@ -1,4 +1,4 @@
-import AbstractView from './abstract';
+import AbstractView from './abstract.js';
 
 const createUserProfileTemplate = (userRank) => (
   `<section class="header__profile profile">
