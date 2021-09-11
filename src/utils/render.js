@@ -1,8 +1,10 @@
 import Abstract from '../view/abstract.js';
 
 export const RenderPosition = {
+  BEFOREBEGIN: 'beforebegin',
   AFTERBEGIN: 'afterbegin',
   BEFOREEND: 'beforeend',
+  AFTEREND: 'afterend',
 };
 
 export const renderElement = (container, element, position = RenderPosition.BEFOREEND) => {
@@ -18,11 +20,17 @@ export const renderElement = (container, element, position = RenderPosition.BEFO
   }
 
   switch (position) {
+    case RenderPosition.BEFOREBEGIN:
+      currentContainer.before(currentElement);
+      break;
     case RenderPosition.AFTERBEGIN:
       currentContainer.prepend(currentElement);
       break;
     case RenderPosition.BEFOREEND:
       currentContainer.append(currentElement);
+      break;
+    case RenderPosition.AFTEREND:
+      currentContainer.after(currentElement);
       break;
   }
 };

@@ -26,3 +26,5 @@ export const humanizeFilmDate = (date) => dayjs(date).format('D MMMM YYYY');
 export const humanizeCommentDate = (date) => dayjs().to(date);
 
 export const getYearFromDate = (date) => dayjs(date).year();
+
+export const getCurrentDate = () => dayjs().toISOString();

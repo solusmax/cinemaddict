@@ -62,10 +62,13 @@ html {
 }
 
 body {
+  display: grid;
   box-sizing: border-box;
   max-width: 1240px;
   padding: var(--vertical-gap) var(--horizontal-gap) 0;
   width: 100%;
+  min-height: 100%;
+  grid-template-rows: min-content 1fr min-content;
 }
 
 .hide-overflow {
@@ -519,11 +522,11 @@ button {
   padding-bottom: 0;
 }
 
-.films-list--extra:last-of-type {
+.films-list--extra:nth-of-type(2n + 3) {
   position: relative;
 }
 
-.films-list--extra:last-of-type::before {
+.films-list--extra:nth-of-type(2n + 3)::before {
   border-left: solid 1px var(--outline-color);
   bottom: 20px;
   content: '';

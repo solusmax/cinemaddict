@@ -1,4 +1,4 @@
-import AbstractFilmCardView from './abstract-film-card';
+import AbstractFilmCardView from './abstract-film-card.js';
 import {
   addPluralEnding,
   getFormattedDuration,

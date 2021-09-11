@@ -1,4 +1,4 @@
-import AbstractView from './abstract';
+import AbstractView from './abstract.js';
 import { addPluralEnding } from '../utils';
 
 const createFooterStatisticsTemplate = (filmsCount) => `<p>${filmsCount} movie${addPluralEnding(filmsCount)} inside</p>`;

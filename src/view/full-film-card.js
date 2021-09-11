@@ -1,20 +1,31 @@
-import AbstractFilmCardView from './abstract-film-card';
+import AbstractFilmCardView from './abstract-film-card.js';
+import he from 'he';
 import {
   addPluralEnding,
   getFormattedDuration,
   humanizeCommentDate,
   humanizeFilmDate,
+  isEnterEvent,
   setActiveClass
 } from '../utils';
 
 const ClassNames = {
+  FORM: 'film-details__inner',
   CONTROL_ACTIVE_STATE: 'film-details__control-button--active',
   CLOSE_BUTTON: 'film-details__close-btn',
   ADD_TO_WATCHLIST_CONTROL: 'film-details__control-button--watchlist',
   MARK_AS_WATCHED_CONTROL: 'film-details__control-button--watched',
   MARK_AS_FAVORITE_CONTROL: 'film-details__control-button--favorite',
-  EMOJI_LIST: 'film-details__emoji-list',
-  COMMENT_FIELD: 'film-details__comment-input',
+  COMMENTS_LIST: 'film-details__comments-list',
+  COMMENT_DELETE_BUTTON: 'film-details__comment-delete',
+  NEW_COMMENT_EMOJI_LIST: 'film-details__emoji-list',
+  NEW_COMMENT_FIELD: 'film-details__comment-input',
+};
+
+const NewCommentError = {
+  BORDER_STYLE: '2px red solid',
+  EMOJI_MESSAGE: 'Please choose emoji.',
+  TEXT_MESSAGE: 'Please enter comment text',
 };
 
 const createCommentTemplate = (comments, id) => {
@@ -28,16 +39,16 @@ const createCommentTemplate = (comments, id) => {
   } = currentComment;
 
   return (
-    `<li class="film-details__comment">
+    `<li class="film-details__comment" data-comment-id="${id}">
       <span class="film-details__comment-emoji">
         <img src="./images/emoji/${emoji}.png" width="55" height="55" alt="emoji-${emoji}">
       </span>
       <div>
-        <p class="film-details__comment-text">${text}</p>
+        <p class="film-details__comment-text">${he.encode(text)}</p>
         <p class="film-details__comment-info">
           <span class="film-details__comment-author">${author}</span>
           <span class="film-details__comment-day">${humanizeCommentDate(date)}</span>
-          <button class="film-details__comment-delete">Delete</button>
+          <button class="${ClassNames.COMMENT_DELETE_BUTTON}" data-comment-id="${id}">Delete</button>
         </p>
       </div>
     </li>`
@@ -82,7 +93,7 @@ const createFullFilmCardTemplate = (film, comments, emojis) => {
   } = film;
 
   return `<section class="film-details">
-    <form class="film-details__inner" action="" method="get">
+    <form class="${ClassNames.FORM}" action="" method="get">
       <div class="film-details__top-container">
         <div class="film-details__close">
           <button class="${ClassNames.CLOSE_BUTTON}" type="button">close</button>
@@ -154,7 +165,7 @@ const createFullFilmCardTemplate = (film, comments, emojis) => {
         <section class="film-details__comments-wrap">
           <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${commentsIds.length}</span></h3>
 
-          <ul class="film-details__comments-list">
+          <ul class="${ClassNames.COMMENTS_LIST}">
             ${commentsIds.map((commentId) => createCommentTemplate(comments, commentId)).join(' ')}
           </ul>
 
@@ -164,10 +175,10 @@ const createFullFilmCardTemplate = (film, comments, emojis) => {
             </div>
 
             <label class="film-details__comment-label">
-              <textarea class="${ClassNames.COMMENT_FIELD}" placeholder="Select reaction below and write comment here" name="comment">${newComment.text}</textarea>
+              <textarea class="${ClassNames.NEW_COMMENT_FIELD}" placeholder="Select reaction below and write comment here" name="comment">${newComment.text}</textarea>
             </label>
 
-            <div class="${ClassNames.EMOJI_LIST}">
+            <div class="${ClassNames.NEW_COMMENT_EMOJI_LIST}">
               ${emojis.map((emoji) => createEmojiTemplate(emoji, emoji === newComment.emoji)).join(' ')}
             </div>
           </div>
@@ -188,14 +199,19 @@ export default class FullFilmCard extends AbstractFilmCardView {
 
     this._scrollPosition = 0;
 
+    this._defaultNewCommentFieldBorderStyle = this._getNewCommentFieldElement().style.border;
+
     this._onCloseButtonClick = this._onCloseButtonClick.bind(this);
-    this._onCommentFieldInput = this._onCommentFieldInput.bind(this);
-    this._onEmojiListClick = this._onEmojiListClick.bind(this);
+    this._onNewCommentFieldInput = this._onNewCommentFieldInput.bind(this);
+    this._onNewCommentEmojiListClick = this._onNewCommentEmojiListClick.bind(this);
+    this._onCommentsListClick = this._onCommentsListClick.bind(this);
+    this._onNewCommentFieldSubmit = this._onNewCommentFieldSubmit.bind(this);
   }
 
-  init(film) {
-    const isFilmNew = film.id !== this.filmId;
-    const currentNewComment = !isFilmNew
+  init(film, isNewModal, comments) {
+    this._comments = comments;
+
+    const currentNewComment = !isNewModal
       ? Object.assign({}, {
         newComment: this._data.newComment,
       })
@@ -203,7 +219,7 @@ export default class FullFilmCard extends AbstractFilmCardView {
 
     this._film = film;
     this.filmId = this._film.id;
-    this._data = FullFilmCard.parseFilmToData(this._film);
+    this._resetData();
     this._updateData(currentNewComment, false);
 
     this._setInnerListeners();
@@ -231,7 +247,84 @@ export default class FullFilmCard extends AbstractFilmCardView {
     this.restoreScrollPosition();
   }
 
+  static parseFilmToData(film) {
+    return Object.assign(
+      {},
+      film,
+      {
+        newComment: {
+          text: '',
+          isEmojiSelected: false,
+          emoji: '',
+        },
+      },
+    );
+  }
+
+  _resetData() {
+    this._data = FullFilmCard.parseFilmToData(this._film);
+  }
+
+  _getCurrentNewCommentText () {
+    return this._data.newComment.text.trim();
+  }
+
+  _getCurrentNewCommentEmoji () {
+    return this._data.newComment.emoji;
+  }
+
+  _checkNewComment() {
+    return this._checkNewCommentField(true) && this._checkNewCommentEmoji();
+  }
+
+  _checkNewCommentField(whetherShowError) {
+    if (!this._getCurrentNewCommentText()) {
+      if (whetherShowError) {
+        this._showNewCommentValidationError(NewCommentError.TEXT_MESSAGE, NewCommentError.BORDER_STYLE);
+      }
+
+      return false;
+    }
+
+    if (this._hasNewCommentValidationError()) {
+      this._hideNewCommentValidationError();
+    }
+
+    return true;
+  }
+
+  _checkNewCommentEmoji() {
+    if (!this._getCurrentNewCommentEmoji()) {
+      this._showNewCommentValidationError(NewCommentError.EMOJI_MESSAGE, NewCommentError.BORDER_STYLE);
+      return false;
+    }
+
+    if (this._hasNewCommentValidationError()) {
+      this._hideNewCommentValidationError();
+    }
+
+    return true;
+  }
+
+  _showNewCommentValidationError(message, borderStyle) {
+    this._getNewCommentFieldElement().style.border = borderStyle;
+    this._getNewCommentFieldElement().setCustomValidity(message);
+    this._getNewCommentFieldElement().reportValidity();
+  }
+
+  _hideNewCommentValidationError() {
+    this._showNewCommentValidationError('', this._defaultNewCommentFieldBorderStyle);
+  }
+
+  _hasNewCommentValidationError() {
+    return this._getNewCommentFieldElement().validity.customError;
+  }
+
   // Геттеры элементов ↓↓↓
+
+  _getFormElement() {
+    return this.getElement().querySelector(`.${ClassNames.FORM}`);
+  }
 
   _getAddToWatchlistButtonElement() {
     return this.getElement().querySelector(`.${ClassNames.ADD_TO_WATCHLIST_CONTROL}`);
@@ -249,12 +342,16 @@ export default class FullFilmCard extends AbstractFilmCardView {
     return this.getElement().querySelector(`.${ClassNames.CLOSE_BUTTON}`);
   }
 
-  _getCommentFieldElement() {
-    return this.getElement().querySelector(`.${ClassNames.COMMENT_FIELD}`);
+  _getCommentsListElement() {
+    return this.getElement().querySelector(`.${ClassNames.COMMENTS_LIST}`);
   }
 
-  _getEmojiListElement() {
-    return this.getElement().querySelector(`.${ClassNames.EMOJI_LIST}`);
+  _getNewCommentFieldElement() {
+    return this.getElement().querySelector(`.${ClassNames.NEW_COMMENT_FIELD}`);
+  }
+
+  _getNewCommentEmojiListElement() {
+    return this.getElement().querySelector(`.${ClassNames.NEW_COMMENT_EMOJI_LIST}`);
   }
 
   // Колбэки листенеров ↓↓↓
@@ -265,7 +362,19 @@ export default class FullFilmCard extends AbstractFilmCardView {
     this._callback.closeButtonClick();
   }
 
-  _onCommentFieldInput(evt) {
+  _onCommentsListClick(evt) {
+    if (!evt.target.classList.contains(ClassNames.COMMENT_DELETE_BUTTON)) {
+      return;
+    }
+
+    evt.preventDefault();
+
+    const commentId = Number(evt.target.dataset.commentId);
+
+    this._callback.commentsListClick(commentId);
+  }
+
+  _onNewCommentFieldInput(evt) {
     evt.preventDefault();
 
     this._updateData({
@@ -277,9 +386,11 @@ export default class FullFilmCard extends AbstractFilmCardView {
         },
       ),
     }, false);
+
+    this._checkNewCommentField(false);
   }
 
-  _onEmojiListClick(evt) {
+  _onNewCommentEmojiListClick(evt) {
     if (evt.target.tagName !== 'INPUT') {
       return;
     }
@@ -315,6 +426,25 @@ export default class FullFilmCard extends AbstractFilmCardView {
     }, true);
   }
 
+  _onNewCommentFieldSubmit(evt) {
+    if (!(evt.ctrlKey && isEnterEvent(evt))) {
+      return;
+    }
+
+    evt.preventDefault();
+
+    if (!this._checkNewComment()) {
+      return;
+    }
+
+    const commentText = this._getCurrentNewCommentText();
+    const commentEmoji = this._getCurrentNewCommentEmoji();
+
+    this._resetData();
+
+    this._callback.newCommentFieldSubmit({ commentText, commentEmoji });
+  }
+
   // Сеттеры листенеров ↓↓↓
 
   setCloseButtonClickListener(cb) {
@@ -322,12 +452,39 @@ export default class FullFilmCard extends AbstractFilmCardView {
     this._getCloseButtonElement().addEventListener('click', this._onCloseButtonClick);
   }
 
-  _setCommentFieldInputListener() {
-    this._getCommentFieldElement().addEventListener('input', this._onCommentFieldInput);
+  setCommentsListClickListener(cb) {
+    this._callback.commentsListClick = cb;
+    this._getCommentsListElement().addEventListener('click', this._onCommentsListClick);
   }
 
-  _setEmojiListClickListener() {
-    this._getEmojiListElement().addEventListener('click', this._onEmojiListClick);
+  _setNewCommentFieldInputListener() {
+    this._getNewCommentFieldElement().addEventListener('input', this._onNewCommentFieldInput);
+  }
+
+  _setNewCommentEmojiListClickListener() {
+    this._getNewCommentEmojiListElement().addEventListener('click', this._onNewCommentEmojiListClick);
+  }
+
+  setNewCommentFieldSubmitListener(cb) {
+    this._callback.newCommentFieldSubmit = cb;
+    this._getFormElement().addEventListener('keydown', this._onNewCommentFieldSubmit);
+  }
+
+  _setInnerListeners() {
+    this._setNewCommentEmojiListClickListener();
+    this._setNewCommentFieldInputListener();
+
+  }
+
+  _restoreListeners() {
+    this._setInnerListeners();
+
+    this.setCloseButtonClickListener(this._callback.closeButtonClick);
+    this.setAddToWatchlistButtonClickListener(this._callback.addToWatchlistButtonClick);
+    this.setMarkAsWatchedButtonClickListener(this._callback.markAsWatchedButtonClick);
+    this.setMarkAsFavoriteButtonClickListener(this._callback.markAsFavoriteButtonClick);
+    this.setCommentsListClickListener(this._callback.commentsListClick);
+    this.setNewCommentFieldSubmitListener(this._callback.newCommentFieldSubmit);
   }
 
   // Удаляторы листенеров ↓↓↓
@@ -336,44 +493,11 @@ export default class FullFilmCard extends AbstractFilmCardView {
     this._getCloseButtonElement().removeEventListener('click', this._onCloseButtonClick);
   }
 
-  // =========================
-
-  _setInnerListeners() {
-    this._setEmojiListClickListener();
-    this._setCommentFieldInputListener();
+  removeCommentsListClickListener() {
+    this._getCommentsListElement().removeEventListener('click', this._onCommentsListClick);
   }
 
-  _restoreListeners() {
-    this._setInnerListeners();
-
-    this.setAddToWatchlistButtonClickListener(this._callback.addToWatchlistButtonClick);
-    this.setMarkAsWatchedButtonClickListener(this._callback.markAsWatchedButtonClick);
-    this.setMarkAsFavoriteButtonClickListener(this._callback.markAsFavoriteButtonClick);
-    this.setCloseButtonClickListener(this._callback.closeButtonClick);
-  }
-
-  static parseFilmToData(film) {
-    return Object.assign(
-      {},
-      film,
-      {
-        newComment: {
-          text: '',
-          isEmojiSelected: false,
-          emoji: '',
-        },
-      },
-    );
-  }
-
-  static parseDataToFilm(data) {
-    const currentData = Object.assign(
-      {},
-      data,
-    );
-
-    delete currentData.newComment;
-
-    return currentData;
+  removeNewCommentFieldSubmitListener() {
+    this._getFormElement().removeEventListener('keydown', this._onNewCommentFieldSubmit);
   }
 }
