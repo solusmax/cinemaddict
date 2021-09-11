@@ -366,7 +366,8 @@ export default class FilmsList {
         this._removeExtraFilmCards();
         this._renderExtraFilmCards();
         break;
-      case UpdateTypes.FILMS_LIST:
+      case UpdateTypes.FILM_AND_FILMS_LIST:
+        this._updateFilm(data);
         this._removeMainFilmCards(false);
         this._renderMainFilmCards();
         break;
@@ -396,7 +397,7 @@ export default class FilmsList {
   _handleAddToWatchlishButtonClick(film) {
     this._handleViewAction(
       UserActions.UPDATE_FILM,
-      this._currentFilterType === FilterTypes.WATCHLIST ? UpdateTypes.FILMS_LIST : UpdateTypes.FILM,
+      this._currentFilterType === FilterTypes.WATCHLIST ? UpdateTypes.FILM_AND_FILMS_LIST : UpdateTypes.FILM,
       Object.assign(
         {},
         film,
@@ -416,7 +417,7 @@ export default class FilmsList {
   _handleMarkAsWatchedButtonClick(film) {
     this._handleViewAction(
       UserActions.UPDATE_FILM,
-      this._currentFilterType === FilterTypes.HISTORY ? UpdateTypes.FILMS_LIST : UpdateTypes.FILM,
+      this._currentFilterType === FilterTypes.HISTORY ? UpdateTypes.FILM_AND_FILMS_LIST : UpdateTypes.FILM,
       Object.assign(
         {},
         film,
@@ -436,7 +437,7 @@ export default class FilmsList {
   _handleMarkAsFavoriteButtonClick(film) {
     this._handleViewAction(
       UserActions.UPDATE_FILM,
-      this._currentFilterType === FilterTypes.FAVORITES ? UpdateTypes.FILMS_LIST : UpdateTypes.FILM,
+      this._currentFilterType === FilterTypes.FAVORITES ? UpdateTypes.FILM_AND_FILMS_LIST : UpdateTypes.FILM,
       Object.assign(
         {},
         film,
