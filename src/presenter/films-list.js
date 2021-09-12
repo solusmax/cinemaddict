@@ -65,9 +65,13 @@ export default class FilmsList {
     }
   }
 
+  _getAllFilms() {
+    return this._filmsModel.films;
+  }
+
   _getCurrentFilms() {
     this._currentFilterType = this._filtersModel.getCurrentFilter();
-    const films = this._filmsModel.films;
+    const films = this._getAllFilms();
     const filteredFilms = filter[this._currentFilterType](films);
 
     switch(this._currentSortMethod) {
@@ -300,7 +304,7 @@ export default class FilmsList {
 
   _renderFullFilmCard(film, isNewModal) {
     if (this._fullFilmCardComponent === null) {
-      this._fullFilmCardComponent = new FullFilmCardView(this._getCurrentFilms()[0], this._commentsModel.comments, this._emojis);
+      this._fullFilmCardComponent = new FullFilmCardView(this._getAllFilms()[0], this._commentsModel.comments, this._emojis);
     }
 
     if (this._fullFilmCardComponent.isElementRendered()) {
