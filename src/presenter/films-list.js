@@ -51,16 +51,19 @@ export default class FilmsList {
     this._onFullFilmCardEscKeydown = this._onFullFilmCardEscKeydown.bind(this);
     this._handleShowMoreButtonClick = this._handleShowMoreButtonClick.bind(this);
     this._handleSortMethodClick = this._handleSortMethodClick.bind(this);
+
+    this._filmsModel.addObserver(this._handleModelEvent);
+    this._filtersModel.addObserver(this._handleModelEvent);
   }
 
   init() {
-    this._filmsModel.addObserver(this._handleModelEvent);
-    this._filtersModel.addObserver(this._handleModelEvent);
-
     renderElement(this._filmsListContainer, this._filmsListComponent);
 
-    if (this._getCurrentFilmsCount() > 0) {
-      this._renderMainFilmCards();
+    this._renderMainFilmCards();
+
+    if (this._getAllFilmsCount() > 0) {
+      this._renderTopRatedFilmsList();
+      this._renderMostCommentedFilmsList();
       this._renderExtraFilmCards();
     }
   }
@@ -69,9 +72,13 @@ export default class FilmsList {
     return this._filmsModel.films;
   }
 
+  _getAllFilmsCount() {
+    return this._getAllFilms().length;
+  }
+
   _getCurrentFilms() {
-    this._currentFilterType = this._filtersModel.getCurrentFilter();
     const films = this._getAllFilms();
+    this._currentFilterType = this._filtersModel.getCurrentFilter();
     const filteredFilms = filter[this._currentFilterType](films);
 
     switch(this._currentSortMethod) {
@@ -117,6 +124,17 @@ export default class FilmsList {
       this._renderFullFilmCard(updatedFilm, false);
       this._fullFilmCardComponent.restoreScrollPosition();
     }
+  }
+
+  destroy() {
+    this._removeMainFilmCards();
+    this._removeExtraFilmCards();
+    this._removeMostCommentedFilmsList();
+    this._removeTopRatedFilmsList();
+    this._resetSortMethod();
+    this._removeSortMenu();
+    this._removeFullFilmCard();
+    removeElement(this._filmsListComponent);
   }
 
   // Карточка фильма ↓↓↓
@@ -231,8 +249,10 @@ export default class FilmsList {
   }
 
   _removeSortMenu() {
-    this._sortMenuComponent.removeSortButtonClickListener();
-    removeElement(this._sortMenuComponent);
+    if (this._sortMenuComponent.isElementRendered()) {
+      this._sortMenuComponent.removeSortButtonClickListener();
+      removeElement(this._sortMenuComponent);
+    }
   }
 
   _resetSortMethod() {
@@ -248,10 +268,10 @@ export default class FilmsList {
         this._renderTopRatedFilmsList();
       }
 
-      getFilmsSortedByRating(this._getCurrentFilms())
+      getFilmsSortedByRating(this._getAllFilms())
         .slice(0, EXTRA_FILMS_COUNT)
         .forEach((film) => this._renderFilmCard(this._filmsListComponent.getTopRatedListContainerElement(), film));
-    } else if (this._filmsListComponent.isTopRatedListElementRendered()) {
+    } else {
       this._removeTopRatedFilmsList();
     }
 
@@ -260,10 +280,10 @@ export default class FilmsList {
         this._renderMostCommentedFilmsList();
       }
 
-      getFilmsSortedByComments(this._getCurrentFilms())
+      getFilmsSortedByComments(this._getAllFilms())
         .slice(0, EXTRA_FILMS_COUNT)
         .forEach((film) => this._renderFilmCard(this._filmsListComponent.getMostCommentedListContainerElement(), film));
-    } else if (this._filmsListComponent.isMostCommentedListElementRendered()) {
+    } else {
       this._removeMostCommentedFilmsList();
     }
   }
@@ -283,19 +303,35 @@ export default class FilmsList {
   }
 
   _renderMostCommentedFilmsList() {
+    if (this._filmsListComponent.isTopRatedListElementRendered()) {
+      return;
+    }
+
     renderElement(this._filmsListComponent, this._filmsListComponent.getMostCommentedListElement());
   }
 
   _removeMostCommentedFilmsList() {
+    if (!this._filmsListComponent.isMostCommentedListElementRendered()) {
+      return;
+    }
+
     this._filmsListComponent.getMostCommentedListElement().remove();
     this._filmsListComponent.removeMostCommentedListElement();
   }
 
   _renderTopRatedFilmsList() {
+    if (this._filmsListComponent.isTopRatedListElementRendered()) {
+      return;
+    }
+
     renderElement(this._filmsListComponent, this._filmsListComponent.getTopRatedListElement());
   }
 
   _removeTopRatedFilmsList() {
+    if (!this._filmsListComponent.isTopRatedListElementRendered()) {
+      return;
+    }
+
     this._filmsListComponent.getTopRatedListElement().remove();
     this._filmsListComponent.removeTopRatedListElement();
   }
@@ -328,6 +364,14 @@ export default class FilmsList {
   }
 
   _removeFullFilmCard() {
+    if (this._fullFilmCardComponent === null) {
+      return;
+    }
+
+    if (!this._fullFilmCardComponent.isElementRendered()) {
+      return;
+    }
+
     this._fullFilmCardComponent.removeAddToWatchlistButtonClickListener();
     this._fullFilmCardComponent.removeMarkAsWatchedButtonClickListener();
     this._fullFilmCardComponent.removeMarkAsFavoriteButtonClickListener();
