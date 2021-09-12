@@ -25,7 +25,7 @@ const ClassNames = {
 const NewCommentError = {
   BORDER_STYLE: '2px red solid',
   EMOJI_MESSAGE: 'Please choose emoji.',
-  TEXT_MESSAGE: 'Please enter comment text',
+  TEXT_MESSAGE: 'Please enter comment text.',
 };
 
 const createCommentTemplate = (comments, id) => {
