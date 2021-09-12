@@ -29,7 +29,7 @@ export const UserActions = {
 export const UpdateTypes = {
   FILM: 'FILM',
   FILM_AND_EXTRA: 'FILM_AND_EXTRA',
-  FILMS_LIST: 'FILMS_LIST',
+  FILM_AND_FILMS_LIST: 'FILM_AND_FILMS_LIST',
   FILMS_LIST_AND_SORT: 'FILMS_LIST_AND_SORT',
 };
 
