@@ -30,8 +30,11 @@ export default class UserRank {
 
     const previousUserRankComponent = this._userRankComponent;
 
-    if (previousUserRankComponent && watchedFilmsCount === 0) {
-      removeElement(previousUserRankComponent);
+    if (watchedFilmsCount === 0) {
+      if (previousUserRankComponent) {
+        removeElement(previousUserRankComponent);
+      }
+
       this._userRankComponent = null;
       return;
     }
