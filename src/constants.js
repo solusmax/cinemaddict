@@ -39,3 +39,15 @@ export const FilterTypes = {
   HISTORY: 'histoty',
   FAVORITES: 'favorites',
 };
+
+export const UserRanks = {
+  NOVICE: 'Novice',
+  FAN: 'Fan',
+  MOVIE_BUFF: 'Movie Buff',
+};
+
+export const UserRanksRanges = {
+  [UserRanks.NOVICE]: [1, 10],
+  [UserRanks.FAN]: [11, 20],
+  [UserRanks.MOVIE_BUFF]: [21, Infinity],
+};

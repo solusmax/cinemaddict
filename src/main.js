@@ -2,8 +2,7 @@ import {
   EMOJIS,
   GENERATED_COMMENTS_COUNT,
   generateComment,
-  generateFilm,
-  getUserRank
+  generateFilm
 } from './data';
 
 import CommentsModel from './model/comments.js';
@@ -16,13 +15,12 @@ import UserProfileView from './view/user-profile.js';
 
 import FilmsListPresenter from './presenter/films-list.js';
 import FiltersPresenter from './presenter/filters.js';
+import UserRank from './presenter/user-rank';
 
 import {
-  filter,
   getRandomInteger,
   renderElement
 } from './utils';
-import { FilterTypes } from './constants.js';
 
 const FILMS_COUNT = getRandomInteger(15, 20);
 
@@ -51,9 +49,8 @@ filmsListPresenter.init();
 const filtersPresenter = new FiltersPresenter(siteMenuComponent, filtersModel, filmsModel);
 filtersPresenter.init();
 
-const userRank = getUserRank(filter[FilterTypes.HISTORY](filmsModel.films).length);
-
-renderElement(siteHeaderElement, new UserProfileView(userRank));
+const userRankPresenter = new UserRank(siteHeaderElement, filmsModel);
+userRankPresenter.init();
 
 const footerStatisticsElement = siteFooterElement.querySelector('.footer__statistics');
 renderElement(footerStatisticsElement, new FooterStatisticsView(films.length));
