@@ -200,7 +200,7 @@ export default class FilmsList {
     if (resetRenderedMainFilmCardsCount) {
       this._renderedMainFilmCardsCount = FILMS_COUNT_PER_STEP;
     } else {
-      this._renderedMainFilmCardsCount = Math.min(this._renderedMainFilmCardsCount, currentFilmsCount);
+      this._renderedMainFilmCardsCount = Math.ceil(Math.min(this._renderedMainFilmCardsCount, currentFilmsCount) / FILMS_COUNT_PER_STEP) * FILMS_COUNT_PER_STEP;
     }
   }
 
