@@ -29,7 +29,7 @@ export const UserActions = {
 export const UpdateTypes = {
   FILM: 'FILM',
   FILM_AND_EXTRA: 'FILM_AND_EXTRA',
-  FILMS_LIST: 'FILMS_LIST',
+  FILM_AND_FILMS_LIST: 'FILM_AND_FILMS_LIST',
   FILMS_LIST_AND_SORT: 'FILMS_LIST_AND_SORT',
 };
 
@@ -38,4 +38,24 @@ export const FilterTypes = {
   WATCHLIST: 'watchlist',
   HISTORY: 'histoty',
   FAVORITES: 'favorites',
+};
+
+export const UserRanks = {
+  NOVICE: 'Novice',
+  FAN: 'Fan',
+  MOVIE_BUFF: 'Movie Buff',
+};
+
+export const UserRanksRanges = {
+  [UserRanks.NOVICE]: [1, 10],
+  [UserRanks.FAN]: [11, 20],
+  [UserRanks.MOVIE_BUFF]: [21, Infinity],
+};
+
+export const StatsRanges = {
+  ALL_TIME: 'All time',
+  TODAY: 'Today',
+  WEEK: 'Week',
+  MONTH: 'Month',
+  YEAR: 'Year',
 };

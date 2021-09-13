@@ -12,22 +12,26 @@ import {
 } from '../utils';
 
 export default class Filters {
-  constructor(filtersContainer, filtersModel, filmsModel) {
+  constructor(filtersContainer, filtersModel, filmsModel, filmsListPresenter, siteMenuComponent) {
     this._filtersContainer = filtersContainer;
 
     this._filtersModel = filtersModel;
     this._filmsModel = filmsModel;
 
     this._filtersComponent = null;
+    this._siteMenuComponent = siteMenuComponent;
+    this._statsComponent = null;
+
+    this._filmsListPresenter = filmsListPresenter;
 
     this._handleModelEvent = this._handleModelEvent.bind(this);
     this._handleFiltersClick = this._handleFiltersClick.bind(this);
+
+    this._filmsModel.addObserver(this._handleModelEvent);
+    this._filtersModel.addObserver(this._handleModelEvent);
   }
 
   init() {
-    this._filmsModel.addObserver(this._handleModelEvent);
-    this._filtersModel.addObserver(this._handleModelEvent);
-
     const filters = this._getFilters();
 
     const previousFiltersComponent = this._filtersComponent;
@@ -71,17 +75,33 @@ export default class Filters {
     ];
   }
 
+  setStatsComponent(statsComponent) {
+    this._statsComponent = statsComponent;
+  }
+
   // Хэндлеры и колбэки ↓↓↓
 
   _handleModelEvent() {
     this.init();
   }
 
-  _handleFiltersClick(filterType) {
-    if (this._filtersModel.getCurrentFilter() === filterType) {
+  _handleFiltersClick(newFilterType) {
+    const previousFilterType = this._filtersModel.getCurrentFilter();
+
+    if (previousFilterType === newFilterType) {
       return;
     }
 
-    this._filtersModel.setCurrentFilter(UpdateTypes.FILMS_LIST_AND_SORT, filterType);
+    if (!previousFilterType) {
+      this._siteMenuComponent.toggleStatsMenuLinkActiveState();
+      removeElement(this._statsComponent);
+
+      this._filtersModel.setCurrentFilter(null, newFilterType);
+      this._filmsListPresenter.init();
+
+      return;
+    }
+
+    this._filtersModel.setCurrentFilter(UpdateTypes.FILMS_LIST_AND_SORT, newFilterType);
   }
 }
