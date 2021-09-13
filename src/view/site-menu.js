@@ -25,6 +25,14 @@ export default class SiteMenu extends AbstractView {
     return this.getElement().querySelector(`#${STATS_MENU_LINK_ID}`);
   }
 
+  saveWindowScrollPosition() {
+    this._windowScrollPosition = window.scrollY;
+  }
+
+  restoreWindowScrollPosition() {
+    window.scrollTo({top: this._windowScrollPosition});
+  }
+
   toggleStatsMenuLinkActiveState() {
     this._getStatsMenuLinkElement().classList.toggle(ADDITIONAL_CONTROL_ACTIVE_STATE_CLASS_NAME);
   }

@@ -22,6 +22,7 @@ import {
 const ClassNames = {
   MAIN: 'statistic',
   STATS_CHART: 'statistic__chart',
+  STATS_CHART_WRAPPER: 'statistic__chart-wrap',
   STATS_FILTER_INPUT: 'statistic__filters-input',
   STATS_TEXT_LIST: 'statistic__text-list',
 };
@@ -99,7 +100,7 @@ const createUserRankTemplate = (userRank) => (
 );
 
 const createStatsChartTemplate = () => (
-  `<div class="statistic__chart-wrap">
+  `<div class="${ClassNames.STATS_CHART_WRAPPER}">
     <canvas class="${ClassNames.STATS_CHART}" width="1000"></canvas>
   </div>`
 );
@@ -184,8 +185,9 @@ export default class Stats extends SmartAbstractView {
     }
 
     if (this._hasMovie) {
-      this._getStatisticCtx().height = BAR_HEIGHT * this._genresCount;
-      this._chart = renderChart(this._getStatisticCtx(), this._genres);
+      this._getStatsChartWrapper().style.height = `${BAR_HEIGHT * this._genresCount}px`;
+      this._getStatsCtx().height = BAR_HEIGHT * this._genresCount;
+      this._chart = renderChart(this._getStatsCtx(), this._genres);
     }
 
     if (!this._isComponentJustCreated) {
@@ -200,16 +202,20 @@ export default class Stats extends SmartAbstractView {
     return createStatsTemplate(this._hasMovie, this._topGenre, this._totalDuration, this._watchedFilmsCount, this._userRank);
   }
 
-  isElementRendered() {
-    return Boolean(document.querySelector(`.${ClassNames.MAIN}`));
-  }
-
   _getStatsTextListTemplate() {
     return createStatsTextList(this._topGenre, this._totalDuration, this._watchedFilmsCount);
   }
 
-  _getStatisticCtx() {
+  isElementRendered() {
+    return Boolean(document.querySelector(`.${ClassNames.MAIN}`));
+  }
+
+  _getStatsCtx() {
     return this.getElement().querySelector(`.${ClassNames.STATS_CHART}`);
+  }
+
+  _getStatsChartWrapper() {
+    return this.getElement().querySelector(`.${ClassNames.STATS_CHART_WRAPPER}`);
   }
 
   _getStatsFilterInputElements() {

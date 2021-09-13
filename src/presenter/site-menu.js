@@ -42,12 +42,17 @@ export default class SiteMenu {
 
     this._siteMenuComponent.toggleStatsMenuLinkActiveState();
 
+    this._siteMenuComponent.saveWindowScrollPosition();
+
     this._filmsListPresenter.destroy();
     this._filtersModel.setCurrentFilter(null, null);
 
     this._statsComponent = new StatsView(this._filmsModel.films);
     this._statsComponent.init();
     renderElement(this._statsContainer, this._statsComponent);
+
+    this._siteMenuComponent.restoreWindowScrollPosition();
+
     this._filtersPresenter.setStatsComponent(this._statsComponent);
   }
 }
