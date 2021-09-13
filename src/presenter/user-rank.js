@@ -1,11 +1,10 @@
 import UserRankView from '../view/user-rank.js';
 import {
-  FilterTypes,
-  UserRanks,
-  UserRanksRanges
+  FilterTypes
 } from '../constants.js';
 import {
   filter,
+  getUserRank,
   renderElement,
   replaceElement,
   removeElement
@@ -39,7 +38,7 @@ export default class UserRank {
       return;
     }
 
-    const userRank = this._getUserRank(watchedFilmsCount);
+    const userRank = getUserRank(watchedFilmsCount);
 
     this._userRankComponent = new UserRankView(userRank);
 
@@ -58,16 +57,6 @@ export default class UserRank {
 
   _getWatchedFilmsCountFilms(films) {
     return filter[FilterTypes.HISTORY](films).length;
-  }
-
-  _getUserRank (watchedFilmsCount) {
-    for (const rank of Object.values(UserRanks)) {
-      if (watchedFilmsCount >= UserRanksRanges[rank][0] && watchedFilmsCount <= UserRanksRanges[rank][1]) {
-        return rank;
-      }
-    }
-
-    return '';
   }
 
   // Хэндлеры и колбэки ↓↓↓
