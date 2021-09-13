@@ -46,6 +46,7 @@ export default class SiteMenu {
     this._filtersModel.setCurrentFilter(null, null);
 
     this._statsComponent = new StatsView(this._filmsModel.films);
+    this._statsComponent.init();
     renderElement(this._statsContainer, this._statsComponent);
     this._filtersPresenter.setStatsComponent(this._statsComponent);
   }

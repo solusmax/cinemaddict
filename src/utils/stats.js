@@ -1,3 +1,10 @@
+import {
+  isDateBetweenNowAndMonthAgo,
+  isDateBetweenNowAndWeekAgo,
+  isDateBetweenNowAndYearAgo,
+  isDateToday
+} from '.';
+
 export const getSortedGenres = (films) => {
   const genres = {};
   const sortedGenres = [];
@@ -16,3 +23,11 @@ export const getSortedGenres = (films) => {
 };
 
 export const getTotalDurationInMinutes = (films) => films.reduce((totalDuration, film) => totalDuration + film.info.duration, 0);
+
+export const getFilmsWatchedToday = (films) => films.filter((film) => isDateToday(film.userMeta.watchingDate));
+
+export const getFilmsWatchedWithinWeek = (films) => films.filter((film) => isDateBetweenNowAndWeekAgo(film.userMeta.watchingDate));
+
+export const getFilmsWatchedWithinMonth = (films) => films.filter((film) => isDateBetweenNowAndMonthAgo(film.userMeta.watchingDate));
+
+export const getFilmsWatchedWithinYear = (films) => films.filter((film) => isDateBetweenNowAndYearAgo(film.userMeta.watchingDate));

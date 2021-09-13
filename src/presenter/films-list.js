@@ -5,6 +5,7 @@ import ShowMoreButtonView from '../view/show-more-button.js';
 import SortMenuView from '../view/sort-menu.js';
 import {
   filter,
+  getCurrentDate,
   getFilmsSortedByComments,
   getFilmsSortedByDate,
   getFilmsSortedByRating,
@@ -475,6 +476,7 @@ export default class FilmsList {
             film.userMeta,
             {
               isWatched: !film.userMeta.isWatched,
+              watchingDate: !film.userMeta.isWatched ? getCurrentDate() : null,
             },
           ),
         },

@@ -51,3 +51,11 @@ export const UserRanksRanges = {
   [UserRanks.FAN]: [11, 20],
   [UserRanks.MOVIE_BUFF]: [21, Infinity],
 };
+
+export const StatsRanges = {
+  ALL_TIME: 'All time',
+  TODAY: 'Today',
+  WEEK: 'Week',
+  MONTH: 'Month',
+  YEAR: 'Year',
+};
