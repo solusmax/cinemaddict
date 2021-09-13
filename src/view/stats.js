@@ -1,3 +1,5 @@
+import Chart from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 import SmartAbstractView from './smart-abstract.js';
 import {
   addPluralEnding,
@@ -8,7 +10,74 @@ import {
 } from '../utils';
 import { FilterTypes } from '../constants.js';
 
-const STATISTIC_CLASS_NAME = 'statistic';
+const ClassNames = {
+  MAIN: 'statistic',
+  STATS_CHART: 'statistic__chart',
+};
+
+const BAR_HEIGHT = 50;
+
+const createChart = (statisticCtx, genres) => {
+  const genreTitles = genres.map((genre) => genre[0]);
+  const filmsPerGenreCounts = genres.map((genre) => genre[1]);
+
+  new Chart(statisticCtx, {
+    plugins: [ChartDataLabels],
+    type: 'horizontalBar',
+    data: {
+      labels: genreTitles,
+      datasets: [{
+        data: filmsPerGenreCounts,
+        backgroundColor: '#ffe800',
+        hoverBackgroundColor: '#ffe800',
+        anchor: 'start',
+        barThickness: 24,
+      }],
+    },
+    options: {
+      plugins: {
+        datalabels: {
+          font: {
+            size: 20,
+          },
+          color: '#ffffff',
+          anchor: 'start',
+          align: 'start',
+          offset: 40,
+        },
+      },
+      scales: {
+        yAxes: [{
+          ticks: {
+            fontColor: '#ffffff',
+            padding: 100,
+            fontSize: 20,
+          },
+          gridLines: {
+            display: false,
+            drawBorder: false,
+          },
+        }],
+        xAxes: [{
+          ticks: {
+            display: false,
+            beginAtZero: true,
+          },
+          gridLines: {
+            display: false,
+            drawBorder: false,
+          },
+        }],
+      },
+      legend: {
+        display: false,
+      },
+      tooltips: {
+        enabled: false,
+      },
+    },
+  });
+};
 
 const createUserRankTemplate = (userRank) => (
   `<p class="statistic__rank">
@@ -20,7 +89,7 @@ const createUserRankTemplate = (userRank) => (
 
 const createStatsChartTemplate = () => (
   `<div class="statistic__chart-wrap">
-    <canvas class="statistic__chart" width="1000"></canvas>
+    <canvas class="${ClassNames.STATS_CHART}" width="1000"></canvas>
   </div>`
 );
 
@@ -49,7 +118,7 @@ const createStatsTemplate = (hasMovie, topGenre, totalDurationInMinutes, watched
   const hours = Math.floor(totalDurationInMinutes / 60);
   const minutes = totalDurationInMinutes - (hours * 60);
 
-  return `<section class="${STATISTIC_CLASS_NAME}">
+  return `<section class="${ClassNames.MAIN}">
     ${hasMovie ? createUserRankTemplate(userRank) : ''}
 
     ${hasMovie ? createStatsFiltersTemplate() : ''}
@@ -87,18 +156,29 @@ export default class Stats extends SmartAbstractView {
     this._topGenre = this._hasMovie
       ? this._genres[0][0]
       : '';
+    this._genresCount = this._genres.length;
     this._totalDuration = this._hasMovie
       ? getTotalDurationInMinutes(this._watchedFilms)
       : 0;
     this._watchedFilmsCount = this._watchedFilms.length;
     this._userRank = getUserRank(this._watchedFilmsCount);
+
+    if (this._hasMovie) {
+      this._getStatisticCtx().height = BAR_HEIGHT * this._genresCount;
+
+      createChart(this._getStatisticCtx(), this._genres);
+    }
   }
 
   _getTemplate() {
     return createStatsTemplate(this._hasMovie, this._topGenre, this._totalDuration, this._watchedFilmsCount, this._userRank);
   }
 
+  _getStatisticCtx() {
+    return this.getElement().querySelector(`.${ClassNames.STATS_CHART}`);
+  }
+
   isElementRendered() {
-    return Boolean(document.querySelector(`.${STATISTIC_CLASS_NAME}`));
+    return Boolean(document.querySelector(`.${ClassNames.STATISTIC}`));
   }
 }
