@@ -1078,10 +1078,16 @@ button {
   background-color: var(--text-color-active);
 }
 .statistic__text-list {
-  display: flex;
-  justify-content: space-around;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   list-style: none;
   margin-bottom: 100px;
+  word-break: break-word;
+}
+.statistic__text-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .statistic__item-title {
   margin: 0;
