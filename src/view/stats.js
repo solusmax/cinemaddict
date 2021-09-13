@@ -201,7 +201,7 @@ export default class Stats extends SmartAbstractView {
   }
 
   isElementRendered() {
-    return Boolean(document.querySelector(`.${ClassNames.STATISTIC}`));
+    return Boolean(document.querySelector(`.${ClassNames.MAIN}`));
   }
 
   _getStatsTextListTemplate() {
