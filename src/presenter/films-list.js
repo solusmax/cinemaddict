@@ -304,7 +304,7 @@ export default class FilmsList {
   }
 
   _renderMostCommentedFilmsList() {
-    if (this._filmsListComponent.isTopRatedListElementRendered()) {
+    if (this._filmsListComponent.isMostCommentedListElementRendered()) {
       return;
     }
 
