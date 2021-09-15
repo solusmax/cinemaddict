@@ -47,4 +47,36 @@ export default class Comments extends AbstractObserver {
 
     this._filmsModel.deleteComment(updateType, [filmToUpdate, commentIdToDelete]);
   }
+
+  static adaptToClient(comment) {
+    const adaptedComment = Object.assign(
+      {},
+      comment,
+      {
+        emoji: comment['emotion'],
+        text: comment['comment'],
+      },
+    );
+
+    delete adaptedComment['emotion'];
+    delete adaptedComment['comment'];
+
+    return adaptedComment;
+  }
+
+  static adaptToServer(comment) {
+    const adaptedComment = Object.assign(
+      {},
+      comment,
+      {
+        'emotion': comment.emoji,
+        'comment': comment.text,
+      },
+    );
+
+    delete adaptedComment.comment.emoji;
+    delete adaptedComment.comment.text;
+
+    return adaptedComment;
+  }
 }
