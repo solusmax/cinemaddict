@@ -49,7 +49,7 @@ export default class Filters {
   }
 
   _getFilters() {
-    const films = this._filmsModel.films;
+    const films = this._filmsModel.getFilms();
 
     return [
       {

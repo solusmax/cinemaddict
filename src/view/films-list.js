@@ -1,4 +1,7 @@
-import { FilterTypes } from '../constants.js';
+import {
+  MainListTitleText,
+  FilterTypes
+} from '../constants.js';
 import { createElement } from '../utils';
 import AbstractView from './abstract.js';
 
@@ -15,23 +18,14 @@ const ClassNames = {
   VISUALLY_HIDDEN: 'visually-hidden',
 };
 
-const EmptyMainListText = {
-  [FilterTypes.ALL_FILMS]: 'There are no movies in our database',
-  [FilterTypes.WATCHLIST]: 'There are no movies to watch now',
-  [FilterTypes.HISTORY]: 'There are no watched movies now',
-  [FilterTypes.FAVORITES]: 'There are no favorite movies now',
-};
-
-const MAIN_LIST_TITLE = 'All movies. Upcoming';
-
 const createMainListInnerTemplate = () => (
-  `<h2 class="${ClassNames.FILMS_LIST_TITLE} ${ClassNames.VISUALLY_HIDDEN}">${MAIN_LIST_TITLE}</h2>
+  `<h2 class="${ClassNames.FILMS_LIST_TITLE} ${ClassNames.VISUALLY_HIDDEN}">${MainListTitleText.DEFAULT}</h2>
 
   <div class="${ClassNames.FILMS_LIST_CONTAINER}">
   </div>`
 );
 
-const createEmptyMainListInnerTemplate = () => `<h2 class="${ClassNames.FILMS_LIST_TITLE}">${EmptyMainListText[FilterTypes.ALL_FILMS]}</h2>`;
+const createEmptyMainListInnerTemplate = () => `<h2 class="${ClassNames.FILMS_LIST_TITLE}">${MainListTitleText[FilterTypes.ALL_FILMS]}</h2>`;
 
 const createTopRatedListTemplate = () => (
   `<section class="${ClassNames.FILMS_LIST} films-list--extra" id="${ListIds.TOP_RATED}">
@@ -93,21 +87,27 @@ export default class FilmsList extends AbstractView {
     return ListIds.MAIN;
   }
 
-  showEmptyMainListText(filterType) {
-    const mainListTitleElement = this._getMainListTitleElement();
-
-    mainListTitleElement.innerText = EmptyMainListText[filterType];
-    mainListTitleElement.classList.remove(ClassNames.VISUALLY_HIDDEN);
+  setMainListTitleText(text) {
+    this._getMainListTitleElement().innerText = text;
   }
 
-  hideEmptyMainListText() {
+  showMainListTitleText() {
     const mainListTitleElement = this._getMainListTitleElement();
 
-    mainListTitleElement.classList.add(ClassNames.VISUALLY_HIDDEN);
-    mainListTitleElement.innerText = MAIN_LIST_TITLE;
+    if (mainListTitleElement.classList.contains(ClassNames.VISUALLY_HIDDEN)) {
+      mainListTitleElement.classList.remove(ClassNames.VISUALLY_HIDDEN);
+    }
   }
 
-  isEmptyMainListTextShown() {
+  hideMainListTitleText() {
+    const mainListTitleElement = this._getMainListTitleElement();
+
+    if (!mainListTitleElement.classList.contains(ClassNames.VISUALLY_HIDDEN)) {
+      mainListTitleElement.classList.add(ClassNames.VISUALLY_HIDDEN);
+    }
+  }
+
+  isMainListTitleTextShown() {
     return !this._getMainListTitleElement().classList.contains(ClassNames.VISUALLY_HIDDEN);
   }
 

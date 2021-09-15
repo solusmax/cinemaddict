@@ -52,7 +52,7 @@ export default class UserRank {
   }
 
   _getFilms() {
-    return this._filmsModel.films;
+    return this._filmsModel.getFilms();
   }
 
   _getWatchedFilmsCountFilms(films) {

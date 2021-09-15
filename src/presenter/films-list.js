@@ -3,6 +3,7 @@ import FilmsListView from '../view/films-list.js';
 import FullFilmCardView from '../view/full-film-card.js';
 import ShowMoreButtonView from '../view/show-more-button.js';
 import SortMenuView from '../view/sort-menu.js';
+import ErrorAlertPresenter from './error-alert.js';
 import {
   filter,
   getCurrentDate,
@@ -19,7 +20,9 @@ import {
   SortMethods,
   UserActions,
   UpdateTypes,
-  FilterTypes
+  FilterTypes,
+  MainListTitleText,
+  CommentsLoadingState
 } from '../constants.js';
 
 const BODY_NO_SCROLL_CLASS_NAME = 'hide-overflow';
@@ -28,24 +31,25 @@ const FILMS_COUNT_PER_STEP = 5;
 const EXTRA_FILMS_COUNT = 2;
 
 export default class FilmsList {
-  constructor(filmsListContainer, filmsModel, commentsModel, filtersModel, emojis) {
+  constructor(filmsListContainer, filmsModel, commentsModel, filtersModel, api) {
     this._filmsListContainer = filmsListContainer;
+
+    this._isLoading = true;
+
+    this._renderedMainFilmCardsCount = FILMS_COUNT_PER_STEP;
+    this._renderedFilmCardComponents = [];
+    this._currentSortMethod = SortMethods.DEFAULT;
 
     this._filmsModel = filmsModel;
     this._commentsModel = commentsModel;
     this._filtersModel = filtersModel;
 
-    this._emojis = emojis.slice();
-
-    this._renderedMainFilmCardsCount = FILMS_COUNT_PER_STEP;
-    this._renderedFilmCardComponents = [];
-    this._currentFilterType = this._filtersModel.getCurrentFilter();
-    this._currentSortMethod = SortMethods.DEFAULT;
-
-    this._filmsListComponent = new FilmsListView(this._getCurrentFilms().length);
+    this._filmsListComponent = this._createFilmsListComponent();
     this._showMoreButtonComponent = null;
     this._sortMenuComponent = new SortMenuView();
     this._fullFilmCardComponent = null;
+
+    this._api = api;
 
     this._handleModelEvent = this._handleModelEvent.bind(this);
     this._handleViewAction = this._handleViewAction.bind(this);
@@ -60,6 +64,13 @@ export default class FilmsList {
   init() {
     renderElement(this._filmsListContainer, this._filmsListComponent);
 
+    if (this._isLoading) {
+      this._renderLoading();
+      return;
+    }
+
+    this._updateCurrentFilterType();
+
     this._renderMainFilmCards();
 
     if (this._getAllFilmsCount() > 0) {
@@ -69,8 +80,23 @@ export default class FilmsList {
     }
   }
 
+  destroy() {
+    this._removeMainFilmCards();
+    this._removeExtraFilmCards();
+    this._removeMostCommentedFilmsList();
+    this._removeTopRatedFilmsList();
+    this._resetSortMethod();
+    this._removeSortMenu();
+    this._removeFullFilmCard();
+    removeElement(this._filmsListComponent);
+  }
+
+  _createFilmsListComponent() {
+    return new FilmsListView(this._getCurrentFilms().length);
+  }
+
   _getAllFilms() {
-    return this._filmsModel.films;
+    return this._filmsModel.getFilms();
   }
 
   _getAllFilmsCount() {
@@ -79,7 +105,7 @@ export default class FilmsList {
 
   _getCurrentFilms() {
     const films = this._getAllFilms();
-    this._currentFilterType = this._filtersModel.getCurrentFilter();
+    this._updateCurrentFilterType();
     const filteredFilms = filter[this._currentFilterType](films);
 
     switch(this._currentSortMethod) {
@@ -121,21 +147,36 @@ export default class FilmsList {
       && this._fullFilmCardComponent.isElementRendered()
       && this._fullFilmCardComponent.filmId === updatedFilm.id
     ) {
-      this._fullFilmCardComponent.saveScrollPosition();
       this._renderFullFilmCard(updatedFilm, false);
-      this._fullFilmCardComponent.restoreScrollPosition();
     }
   }
 
-  destroy() {
-    this._removeMainFilmCards();
-    this._removeExtraFilmCards();
-    this._removeMostCommentedFilmsList();
-    this._removeTopRatedFilmsList();
-    this._resetSortMethod();
-    this._removeSortMenu();
-    this._removeFullFilmCard();
-    removeElement(this._filmsListComponent);
+  _updateCurrentFilterType() {
+    this._currentFilterType = this._filtersModel.getCurrentFilter();
+  }
+
+  _disableAllMetaButtons(film) {
+    if (this._fullFilmCardComponent !== null && this._fullFilmCardComponent.isElementRendered()) {
+      this._fullFilmCardComponent.disableMetaButtons();
+    }
+
+    this._renderedFilmCardComponents.forEach((filmCardComponent) => {
+      if (filmCardComponent.filmId === film.id) {
+        filmCardComponent.disableMetaButtons();
+      }
+    });
+  }
+
+  _enableAllMetaButtons(film) {
+    if (this._fullFilmCardComponent !== null && this._fullFilmCardComponent.isElementRendered()) {
+      this._fullFilmCardComponent.enableMetaButtons();
+    }
+
+    this._renderedFilmCardComponents.forEach((filmCardComponent) => {
+      if (filmCardComponent.filmId === film.id) {
+        filmCardComponent.enableMetaButtons();
+      }
+    });
   }
 
   // Карточка фильма ↓↓↓
@@ -160,8 +201,9 @@ export default class FilmsList {
       return;
     }
 
-    if (this._filmsListComponent.isEmptyMainListTextShown()) {
-      this._filmsListComponent.hideEmptyMainListText();
+    if (this._filmsListComponent.isMainListTitleTextShown()) {
+      this._filmsListComponent.setMainListTitleText(MainListTitleText.DEFAULT);
+      this._filmsListComponent.hideMainListTitleText();
     }
 
     films
@@ -205,9 +247,9 @@ export default class FilmsList {
   }
 
   _setFilmCardComponentListeners(filmCardComponent, film) {
-    filmCardComponent.setTitleClickListener(this._renderFullFilmCard.bind(this,film, true));
-    filmCardComponent.setPosterClickListener(this._renderFullFilmCard.bind(this,film, true));
-    filmCardComponent.setCommentsLinkClickListener(this._renderFullFilmCard.bind(this,film, true));
+    filmCardComponent.setTitleClickListener(this._handleOpenFullFilmCardClick.bind(this, film));
+    filmCardComponent.setPosterClickListener(this._handleOpenFullFilmCardClick.bind(this, film));
+    filmCardComponent.setCommentsLinkClickListener(this._handleOpenFullFilmCardClick.bind(this, film));
 
     filmCardComponent.setAddToWatchlistButtonClickListener(this._handleAddToWatchlishButtonClick.bind(this, film));
     filmCardComponent.setMarkAsWatchedButtonClickListener(this._handleMarkAsWatchedButtonClick.bind(this, film));
@@ -229,7 +271,13 @@ export default class FilmsList {
   }
 
   _renderNoFilms() {
-    this._filmsListComponent.showEmptyMainListText(this._currentFilterType);
+    this._filmsListComponent.setMainListTitleText(MainListTitleText[this._currentFilterType]);
+    this._filmsListComponent.showMainListTitleText();
+  }
+
+  _renderLoading() {
+    this._filmsListComponent.setMainListTitleText(MainListTitleText.LOADING);
+    this._filmsListComponent.showMainListTitleText();
   }
 
   _renderShowMoreButton() {
@@ -339,18 +387,26 @@ export default class FilmsList {
 
   // Модалка ↓↓↓
 
-  _renderFullFilmCard(film, isNewModal) {
+  _renderFullFilmCard(film, isNewModal, commentsLoadingState) {
+    if (!isNewModal) {
+      this._fullFilmCardComponent.saveScrollPosition();
+    }
+
     if (this._fullFilmCardComponent === null) {
-      this._fullFilmCardComponent = new FullFilmCardView(this._getAllFilms()[0], this._commentsModel.comments, this._emojis);
+      this._fullFilmCardComponent = new FullFilmCardView(this._getAllFilms()[0], []);
     }
 
     if (this._fullFilmCardComponent.isElementRendered()) {
       this._removeFullFilmCard();
     }
 
-    this._fullFilmCardComponent.init(film, isNewModal, this._commentsModel.comments);
+    this._fullFilmCardComponent.init(film, isNewModal, this._commentsModel.comments, commentsLoadingState);
     renderElement(document.body, this._fullFilmCardComponent);
     document.body.classList.add(BODY_NO_SCROLL_CLASS_NAME);
+
+    if (!isNewModal) {
+      this._fullFilmCardComponent.restoreScrollPosition();
+    }
 
     this._fullFilmCardComponent.setAddToWatchlistButtonClickListener(this._handleAddToWatchlishButtonClick.bind(this, film));
     this._fullFilmCardComponent.setMarkAsWatchedButtonClickListener(this._handleMarkAsWatchedButtonClick.bind(this, film));
@@ -394,7 +450,30 @@ export default class FilmsList {
   _handleViewAction(actionType, updateType, update) {
     switch (actionType) {
       case UserActions.UPDATE_FILM:
-        this._filmsModel.updateFilm(updateType, update);
+        this._api.updateFilm(update)
+          .then(() => {
+            let latestUpdateType;
+            this._updateCurrentFilterType();
+
+            switch (this._currentFilterType) {
+              case null:
+                latestUpdateType = null;
+                break;
+              case updateType:
+                latestUpdateType = UpdateTypes.FILM_AND_FILMS_LIST;
+                break;
+              default:
+                latestUpdateType = UpdateTypes.FILM;
+            }
+
+            this._filmsModel.updateFilm(latestUpdateType, update);
+          })
+          .catch(() => {
+            ErrorAlertPresenter.renderErrorAlert('Film update error');
+          })
+          .finally(() => {
+            this._enableAllMetaButtons(update);
+          });
         break;
       case UserActions.ADD_COMMENT:
         this._commentsModel.addComment(updateType, update);
@@ -407,18 +486,27 @@ export default class FilmsList {
 
   _handleModelEvent(updateType, data) {
     switch (updateType) {
+      case UpdateTypes.INIT: {
+        this._isLoading = false;
+        removeElement(this._filmsListComponent);
+        this._filmsListComponent = this._createFilmsListComponent();
+        this._filmsListComponent.setMainListTitleText(MainListTitleText.DEFAULT);
+        this._filmsListComponent.hideMainListTitleText();
+        this.init();
+        break;
+      }
       case UpdateTypes.FILM:
         this._updateFilm(data);
-        break;
-      case UpdateTypes.FILM_AND_EXTRA:
-        this._updateFilm(data);
-        this._removeExtraFilmCards();
-        this._renderExtraFilmCards();
         break;
       case UpdateTypes.FILM_AND_FILMS_LIST:
         this._updateFilm(data);
         this._removeMainFilmCards(false);
         this._renderMainFilmCards();
+        break;
+      case UpdateTypes.FILM_AND_EXTRA:
+        this._updateFilm(data);
+        this._removeExtraFilmCards();
+        this._renderExtraFilmCards();
         break;
       case UpdateTypes.FILMS_LIST_AND_SORT:
         this._resetSortMethod();
@@ -444,9 +532,11 @@ export default class FilmsList {
   }
 
   _handleAddToWatchlishButtonClick(film) {
+    this._disableAllMetaButtons(film);
+
     this._handleViewAction(
       UserActions.UPDATE_FILM,
-      this._currentFilterType === FilterTypes.WATCHLIST ? UpdateTypes.FILM_AND_FILMS_LIST : UpdateTypes.FILM,
+      FilterTypes.WATCHLIST,
       Object.assign(
         {},
         film,
@@ -464,9 +554,11 @@ export default class FilmsList {
   }
 
   _handleMarkAsWatchedButtonClick(film) {
+    this._disableAllMetaButtons(film);
+
     this._handleViewAction(
       UserActions.UPDATE_FILM,
-      this._currentFilterType === FilterTypes.HISTORY ? UpdateTypes.FILM_AND_FILMS_LIST : UpdateTypes.FILM,
+      FilterTypes.HISTORY,
       Object.assign(
         {},
         film,
@@ -485,9 +577,11 @@ export default class FilmsList {
   }
 
   _handleMarkAsFavoriteButtonClick(film) {
+    this._disableAllMetaButtons(film);
+
     this._handleViewAction(
       UserActions.UPDATE_FILM,
-      this._currentFilterType === FilterTypes.FAVORITES ? UpdateTypes.FILM_AND_FILMS_LIST : UpdateTypes.FILM,
+      FilterTypes.FAVORITES,
       Object.assign(
         {},
         film,
@@ -502,6 +596,27 @@ export default class FilmsList {
         },
       ),
     );
+  }
+
+  _handleOpenFullFilmCardClick(film) {
+    this._api.cancelCurrentLoadingComments();
+    this._commentsModel.comments = [];
+
+    this._renderFullFilmCard(film, true, CommentsLoadingState.LOADING);
+
+    this._api.getComments(film.id)
+      .then((comments) => {
+        this._commentsModel.comments = comments;
+        this._renderFullFilmCard(film, false, CommentsLoadingState.LOADED);
+      })
+      .catch((err) => {
+        if (err.name === 'AbortError') {
+          return;
+        }
+
+        this._renderFullFilmCard(film, false, CommentsLoadingState.ERROR_LOADING);
+        ErrorAlertPresenter.renderErrorAlert(CommentsLoadingState.ERROR_LOADING);
+      });
   }
 
   _onFullFilmCardEscKeydown(evt) {

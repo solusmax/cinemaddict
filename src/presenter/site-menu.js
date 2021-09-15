@@ -2,6 +2,7 @@ import SiteMenuView from '../view/site-menu.js';
 import StatsView from '../view/stats.js';
 import FiltersPresenter from './filters.js';
 import {
+  removeElement,
   renderElement,
   RenderPosition
 } from '../utils';
@@ -20,7 +21,10 @@ export default class SiteMenu {
     this._filmsListPresenter = filmsListPresenter;
     this._filtersPresenter = null;
 
+    this._handleModelEvent = this._handleModelEvent.bind(this);
     this._handleStatsMenuLinkClick = this._handleStatsMenuLinkClick.bind(this);
+
+    this._filmsModel.addObserver(this._handleModelEvent);
   }
 
   init() {
@@ -33,7 +37,33 @@ export default class SiteMenu {
     }
   }
 
+  _renderStats(isFirstOpen) {
+    this._siteMenuComponent.saveWindowScrollPosition();
+
+    if (!isFirstOpen) {
+      removeElement(this._statsComponent);
+    } else {
+      this._filmsListPresenter.destroy();
+    }
+
+    this._filtersModel.setCurrentFilter(null, null);
+
+    this._statsComponent = new StatsView(this._filmsModel.getFilms());
+    this._statsComponent.init();
+    renderElement(this._statsContainer, this._statsComponent);
+
+    this._siteMenuComponent.restoreWindowScrollPosition();
+
+    this._filtersPresenter.setStatsComponent(this._statsComponent);
+  }
+
   // Хэндлеры и колбэки ↓↓↓
+
+  _handleModelEvent() {
+    if (this._statsComponent && this._statsComponent.isElementRendered()) {
+      this._renderStats(false);
+    }
+  }
 
   _handleStatsMenuLinkClick() {
     if (this._statsComponent && this._statsComponent.isElementRendered()) {
@@ -42,17 +72,6 @@ export default class SiteMenu {
 
     this._siteMenuComponent.toggleStatsMenuLinkActiveState();
 
-    this._siteMenuComponent.saveWindowScrollPosition();
-
-    this._filmsListPresenter.destroy();
-    this._filtersModel.setCurrentFilter(null, null);
-
-    this._statsComponent = new StatsView(this._filmsModel.films);
-    this._statsComponent.init();
-    renderElement(this._statsContainer, this._statsComponent);
-
-    this._siteMenuComponent.restoreWindowScrollPosition();
-
-    this._filtersPresenter.setStatsComponent(this._statsComponent);
+    this._renderStats(true);
   }
 }
