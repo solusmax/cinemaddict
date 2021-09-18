@@ -1,18 +1,9 @@
-export const RANDOM_SENTENCES = [
-  'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-  'Cras aliquet varius magna, non porta ligula feugiat eget.',
-  'Fusce tristique felis at fermentum pharetra.',
-  'Aliquam id orci ut lectus varius viverra.',
-  'Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante.',
-  'Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum.',
-  'Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui.',
-  'Sed sed nisi sed augue convallis suscipit in sed felis.',
-  'Aliquam erat volutpat.',
-  'Nunc fermentum tortor ac porta dapibus.',
-  'In rutrum ac purus sit amet tempus.',
+export const EMOJIS = [
+  'angry',
+  'puke',
+  'sleeping',
+  'smile',
 ];
-
-export const MINUTES_IN_ONE_DAY = 1440;
 
 export const SortMethods = {
   DEFAULT: 'default',
@@ -27,6 +18,7 @@ export const UserActions = {
 };
 
 export const UpdateTypes = {
+  INIT: 'INIT',
   FILM: 'FILM',
   FILM_AND_EXTRA: 'FILM_AND_EXTRA',
   FILM_AND_FILMS_LIST: 'FILM_AND_FILMS_LIST',
@@ -36,7 +28,7 @@ export const UpdateTypes = {
 export const FilterTypes = {
   ALL_FILMS: 'all',
   WATCHLIST: 'watchlist',
-  HISTORY: 'histoty',
+  HISTORY: 'history',
   FAVORITES: 'favorites',
 };
 
@@ -58,4 +50,19 @@ export const StatsRanges = {
   WEEK: 'Week',
   MONTH: 'Month',
   YEAR: 'Year',
+};
+
+export const MainListTitleText = {
+  DEFAULT: 'All movies. Upcoming',
+  [FilterTypes.ALL_FILMS]: 'There are no movies in our database',
+  [FilterTypes.WATCHLIST]: 'There are no movies to watch now',
+  [FilterTypes.HISTORY]: 'There are no watched movies now',
+  [FilterTypes.FAVORITES]: 'There are no favorite movies now',
+  LOADING: 'Loading...',
+};
+
+export const CommentsLoadingState = {
+  LOADING: 'Loading...',
+  LOADED: 'LOADED',
+  ERROR_LOADING: 'Error loading comments',
 };

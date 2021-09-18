@@ -1,9 +1,7 @@
-import { getUniqueCommentId } from '../data/comment.js';
 import AbstractObserver from '../utils/abstract-observer.js';
 import {
   findIndexById,
-  getArrayWithoutElement,
-  getCurrentDate
+  getArrayWithoutElement
 } from '../utils';
 
 export default class Comments extends AbstractObserver {
@@ -24,11 +22,8 @@ export default class Comments extends AbstractObserver {
 
   addComment(updateType, [filmToUpdate, {commentText, commentEmoji}]) {
     const newComment = {
-      id: getUniqueCommentId(),
       text: commentText,
       emoji: commentEmoji,
-      author: 'Me',
-      date: getCurrentDate(),
     };
 
     this._comments.push(newComment);
@@ -46,5 +41,37 @@ export default class Comments extends AbstractObserver {
     this._comments = getArrayWithoutElement(this._comments, commentIndex);
 
     this._filmsModel.deleteComment(updateType, [filmToUpdate, commentIdToDelete]);
+  }
+
+  static adaptToClient(comment) {
+    const adaptedComment = Object.assign(
+      {},
+      comment,
+      {
+        emoji: comment['emotion'],
+        text: comment['comment'],
+      },
+    );
+
+    delete adaptedComment['emotion'];
+    delete adaptedComment['comment'];
+
+    return adaptedComment;
+  }
+
+  static adaptToServer(comment) {
+    const adaptedComment = Object.assign(
+      {},
+      comment,
+      {
+        'emotion': comment.emoji,
+        'comment': comment.text,
+      },
+    );
+
+    delete adaptedComment.comment.emoji;
+    delete adaptedComment.comment.text;
+
+    return adaptedComment;
   }
 }

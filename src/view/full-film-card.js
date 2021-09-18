@@ -1,5 +1,5 @@
-import AbstractFilmCardView from './abstract-film-card.js';
 import he from 'he';
+import AbstractFilmCardView from './abstract-film-card.js';
 import {
   addPluralEnding,
   getFormattedDuration,
@@ -8,6 +8,10 @@ import {
   isEnterEvent,
   setActiveClass
 } from '../utils';
+import {
+  CommentsLoadingState,
+  EMOJIS
+} from '../constants.js';
 
 const ClassNames = {
   FORM: 'film-details__inner',
@@ -55,6 +59,19 @@ const createCommentTemplate = (comments, id) => {
   );
 };
 
+const createCommentsTemplate = (comments, commentsIds, commentsLoadingState) => {
+  switch (commentsLoadingState) {
+    case CommentsLoadingState.LOADED:
+      return `<ul class="${ClassNames.COMMENTS_LIST}">
+          ${commentsIds.map((commentId) => createCommentTemplate(comments, commentId)).join(' ')}
+        </ul>`;
+    case CommentsLoadingState.LOADING:
+      return `<ul class="${ClassNames.COMMENTS_LIST}">${CommentsLoadingState.LOADING}</ul>`;
+    case CommentsLoadingState.ERROR_LOADING:
+      return `<ul class="${ClassNames.COMMENTS_LIST}">${CommentsLoadingState.ERROR_LOADING}</ul>`;
+  }
+};
+
 const createSelectedEmojiTemplate = (isEmojiSelected, emoji) => isEmojiSelected ? `<img src="images/emoji/${emoji}.png" width="55" height="55" alt="emoji-${emoji}">` : '';
 
 const createEmojiTemplate = (emoji, isSelected) => (
@@ -66,7 +83,7 @@ const createEmojiTemplate = (emoji, isSelected) => (
 
 const createGenreTemplate = (genre) => `<span class="film-details__genre">${genre}</span>`;
 
-const createFullFilmCardTemplate = (film, comments, emojis) => {
+const createFullFilmCardTemplate = (film, comments, commentsLoadingState) => {
   const {
     comments: commentsIds,
     info: {
@@ -165,9 +182,7 @@ const createFullFilmCardTemplate = (film, comments, emojis) => {
         <section class="film-details__comments-wrap">
           <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${commentsIds.length}</span></h3>
 
-          <ul class="${ClassNames.COMMENTS_LIST}">
-            ${commentsIds.map((commentId) => createCommentTemplate(comments, commentId)).join(' ')}
-          </ul>
+          ${createCommentsTemplate(comments, commentsIds, commentsLoadingState)}
 
           <div class="film-details__new-comment">
             <div class="film-details__add-emoji-label">
@@ -179,7 +194,7 @@ const createFullFilmCardTemplate = (film, comments, emojis) => {
             </label>
 
             <div class="${ClassNames.NEW_COMMENT_EMOJI_LIST}">
-              ${emojis.map((emoji) => createEmojiTemplate(emoji, emoji === newComment.emoji)).join(' ')}
+              ${EMOJIS.map((emoji) => createEmojiTemplate(emoji, emoji === newComment.emoji)).join(' ')}
             </div>
           </div>
         </section>
@@ -189,13 +204,13 @@ const createFullFilmCardTemplate = (film, comments, emojis) => {
 };
 
 export default class FullFilmCard extends AbstractFilmCardView {
-  constructor(film, comments, emojis) {
+  constructor(film, comments) {
     super(film);
 
     this._data = FullFilmCard.parseFilmToData(this._film);
 
     this._comments = comments;
-    this._emojis = emojis;
+    this._commentsLoadingState = CommentsLoadingState.LOADING;
 
     this._scrollPosition = 0;
 
@@ -208,8 +223,12 @@ export default class FullFilmCard extends AbstractFilmCardView {
     this._onNewCommentFieldSubmit = this._onNewCommentFieldSubmit.bind(this);
   }
 
-  init(film, isNewModal, comments) {
+  init(film, isNewModal, comments, commentsLoadingState) {
     this._comments = comments;
+
+    if (commentsLoadingState) {
+      this._commentsLoadingState = commentsLoadingState;
+    }
 
     const currentNewComment = !isNewModal
       ? Object.assign({}, {
@@ -226,7 +245,7 @@ export default class FullFilmCard extends AbstractFilmCardView {
   }
 
   _getTemplate() {
-    return createFullFilmCardTemplate(this._data, this._comments, this._emojis);
+    return createFullFilmCardTemplate(this._data, this._comments, this._commentsLoadingState);
   }
 
   isElementRendered() {

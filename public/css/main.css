@@ -459,6 +459,11 @@ button {
   opacity: 0.7;
 }
 
+.film-card__controls-item:disabled,
+.film-card__controls-item:disabled:hover {
+  opacity: 1;
+}
+
 .film-card__controls-item--add-to-watchlist {
   background-image: url('../images/icons/icon-watchlist.svg');
   background-size: 17px 15px;
@@ -737,6 +742,9 @@ button {
 .film-details__control-button:hover {
   opacity: 0.7;
 }
+.film-details__control-button:disabled {
+  opacity: 1;
+}
 .film-details__control-button::before {
   content: '';
   width: 17px;
@@ -833,6 +841,7 @@ button {
   margin: 0;
   list-style: none;
   margin-bottom: 30px;
+  font-size: 25px;
 }
 .film-details__comment-text {
   margin: 0;
@@ -1078,10 +1087,16 @@ button {
   background-color: var(--text-color-active);
 }
 .statistic__text-list {
-  display: flex;
-  justify-content: space-around;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   list-style: none;
   margin-bottom: 100px;
+  word-break: break-word;
+}
+.statistic__text-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .statistic__item-title {
   margin: 0;
@@ -1109,4 +1124,20 @@ button {
   min-height: 300px;
   padding-top: 50px;
   padding-bottom: 50px;
+}
+.error-alert {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 10000;
+  padding: 10px;
+  background-color: #ad2108;
+}
+.error-alert__title {
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+  font-size: 15px;
+  color: #ffffff;
 }

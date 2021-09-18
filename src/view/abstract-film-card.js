@@ -24,6 +24,18 @@ export default class AbstractFilmCard extends SmartAbstractView {
     this._filmId = id;
   }
 
+  disableMetaButtons() {
+    this._getAddToWatchlistButtonElement().disabled = true;
+    this._getMarkAsWatchedButtonElement().disabled = true;
+    this._getMarkAsFavoriteButtonElement().disabled = true;
+  }
+
+  enableMetaButtons() {
+    this._getAddToWatchlistButtonElement().disabled = false;
+    this._getMarkAsWatchedButtonElement().disabled = false;
+    this._getMarkAsFavoriteButtonElement().disabled = false;
+  }
+
   // Геттеры элементов ↓↓↓
 
   _getAddToWatchlistButtonElement() {
