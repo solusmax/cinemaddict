@@ -20,27 +20,24 @@ export default class Comments extends AbstractObserver {
     this._comments = comments.slice();
   }
 
-  addComment(updateType, [filmToUpdate, {commentText, commentEmoji}]) {
-    const newComment = {
-      text: commentText,
-      emoji: commentEmoji,
-    };
+  addComment(updateType, filmToUpdate, updatedComments) {
+    this._comments = updatedComments;
 
-    this._comments.push(newComment);
-
-    this._filmsModel.addComment(updateType, filmToUpdate, newComment.id);
+    this._filmsModel.addComment(updateType, filmToUpdate, updatedComments);
   }
 
-  deleteComment(updateType, [filmToUpdate, commentIdToDelete]) {
-    const commentIndex = findIndexById(this._comments, commentIdToDelete);
+  deleteComment(updateType, whetherUpdateCommentsModel, filmToUpdate, commentIdToDelete) {
+    if (whetherUpdateCommentsModel) {
+      const commentIndex = findIndexById(this._comments, commentIdToDelete);
 
-    if (commentIndex === -1) {
-      throw new Error('Can\'t delete unexisting comment');
+      if (commentIndex === -1) {
+        throw new Error('Can\'t delete unexisting comment');
+      }
+
+      this._comments = getArrayWithoutElement(this._comments, commentIndex);
     }
 
-    this._comments = getArrayWithoutElement(this._comments, commentIndex);
-
-    this._filmsModel.deleteComment(updateType, [filmToUpdate, commentIdToDelete]);
+    this._filmsModel.deleteComment(updateType, filmToUpdate, commentIdToDelete);
   }
 
   static adaptToClient(comment) {
@@ -69,8 +66,8 @@ export default class Comments extends AbstractObserver {
       },
     );
 
-    delete adaptedComment.comment.emoji;
-    delete adaptedComment.comment.text;
+    delete adaptedComment.emoji;
+    delete adaptedComment.text;
 
     return adaptedComment;
   }

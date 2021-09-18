@@ -9,11 +9,16 @@ import {
   setActiveClass
 } from '../utils';
 import {
-  CommentsLoadingState,
-  EMOJIS
+  EMOJIS,
+  ErrorMessage,
+  FilmCardStateType,
+  ViewStateValue
 } from '../constants.js';
 
+const SHAKE_ANIMATION_TIMEOUT = 600;
+
 const ClassNames = {
+  MAIN: 'film-details',
   FORM: 'film-details__inner',
   CONTROL_ACTIVE_STATE: 'film-details__control-button--active',
   CLOSE_BUTTON: 'film-details__close-btn',
@@ -21,7 +26,9 @@ const ClassNames = {
   MARK_AS_WATCHED_CONTROL: 'film-details__control-button--watched',
   MARK_AS_FAVORITE_CONTROL: 'film-details__control-button--favorite',
   COMMENTS_LIST: 'film-details__comments-list',
+  COMMENT: 'film-details__comment',
   COMMENT_DELETE_BUTTON: 'film-details__comment-delete',
+  NEW_COMMENT_FORM: 'film-details__new-comment',
   NEW_COMMENT_EMOJI_LIST: 'film-details__emoji-list',
   NEW_COMMENT_FIELD: 'film-details__comment-input',
 };
@@ -32,7 +39,14 @@ const NewCommentError = {
   TEXT_MESSAGE: 'Please enter comment text.',
 };
 
-const createCommentTemplate = (comments, id) => {
+const CommentDeleteButtonText = {
+  DELETING: 'Deleting...',
+  DELETE: 'Delete',
+};
+
+const COMMENTS_LOADING_TEXT = 'Loading...';
+
+const createCommentTemplate = (comments, id, commentsIdsToDelete) => {
   const currentComment = comments.find((comment) => comment.id === id);
 
   const {
@@ -42,8 +56,10 @@ const createCommentTemplate = (comments, id) => {
     date,
   } = currentComment;
 
+  const isDeleting = commentsIdsToDelete.has(Number(id));
+
   return (
-    `<li class="film-details__comment" data-comment-id="${id}">
+    `<li class="${ClassNames.COMMENT}" data-comment-id="${id}">
       <span class="film-details__comment-emoji">
         <img src="./images/emoji/${emoji}.png" width="55" height="55" alt="emoji-${emoji}">
       </span>
@@ -52,38 +68,62 @@ const createCommentTemplate = (comments, id) => {
         <p class="film-details__comment-info">
           <span class="film-details__comment-author">${author}</span>
           <span class="film-details__comment-day">${humanizeCommentDate(date)}</span>
-          <button class="${ClassNames.COMMENT_DELETE_BUTTON}" data-comment-id="${id}">Delete</button>
+          <button class="${ClassNames.COMMENT_DELETE_BUTTON}" data-comment-id="${id}" ${isDeleting ? 'disabled' : ''}>${isDeleting ? CommentDeleteButtonText.DELETING : CommentDeleteButtonText.DELETE}</button>
         </p>
       </div>
     </li>`
   );
 };
 
-const createCommentsTemplate = (comments, commentsIds, commentsLoadingState) => {
+const createCommentsTemplate = (comments, commentsIds, commentsLoadingState, commentsIdsToDelete) => {
   switch (commentsLoadingState) {
-    case CommentsLoadingState.LOADED:
+    case ViewStateValue.NO_PROCESSING:
       return `<ul class="${ClassNames.COMMENTS_LIST}">
-          ${commentsIds.map((commentId) => createCommentTemplate(comments, commentId)).join(' ')}
+          ${commentsIds.map((commentId) => createCommentTemplate(comments, commentId, commentsIdsToDelete)).join(' ')}
         </ul>`;
-    case CommentsLoadingState.LOADING:
-      return `<ul class="${ClassNames.COMMENTS_LIST}">${CommentsLoadingState.LOADING}</ul>`;
-    case CommentsLoadingState.ERROR_LOADING:
-      return `<ul class="${ClassNames.COMMENTS_LIST}">${CommentsLoadingState.ERROR_LOADING}</ul>`;
+    case ViewStateValue.PROCESSING:
+      return `<ul class="${ClassNames.COMMENTS_LIST}">${COMMENTS_LOADING_TEXT}</ul>`;
+    case ViewStateValue.ERROR:
+      return `<ul class="${ClassNames.COMMENTS_LIST}">${ErrorMessage.COMMENTS_LOADING}</ul>`;
   }
 };
 
 const createSelectedEmojiTemplate = (isEmojiSelected, emoji) => isEmojiSelected ? `<img src="images/emoji/${emoji}.png" width="55" height="55" alt="emoji-${emoji}">` : '';
 
-const createEmojiTemplate = (emoji, isSelected) => (
-  `<input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-${emoji}" value="${emoji}" ${isSelected ? 'checked' : ''}>
+const createEmojiTemplate = (emoji, isSelected, isDisabled) => (
+  `<input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-${emoji}" value="${emoji}" ${isSelected ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
   <label class="film-details__emoji-label" for="emoji-${emoji}">
     <img src="./images/emoji/${emoji}.png" width="30" height="30" alt="emoji">
   </label>`
 );
 
+const createNewCommentTemplate = (newComment, commentAddingState) => {
+  const {
+    emoji: selectedEmoji,
+    isEmojiSelected,
+    text,
+  } = newComment;
+
+  const isAdding = commentAddingState === ViewStateValue.PROCESSING;
+
+  return `<div class="${ClassNames.NEW_COMMENT_FORM}">
+    <div class="film-details__add-emoji-label ${isAdding ? 'film-details__add-emoji-label--disabled' : ''}">
+      ${createSelectedEmojiTemplate(isEmojiSelected, selectedEmoji)}
+    </div>
+
+    <label class="film-details__comment-label">
+      <textarea class="${ClassNames.NEW_COMMENT_FIELD}" placeholder="Select reaction below and write comment here" name="comment" ${isAdding ? 'disabled' : ''}>${text}</textarea>
+    </label>
+
+    <div class="${ClassNames.NEW_COMMENT_EMOJI_LIST}">
+      ${EMOJIS.map((emoji) => createEmojiTemplate(emoji, emoji === selectedEmoji, isAdding)).join(' ')}
+    </div>
+  </div>`;
+};
+
 const createGenreTemplate = (genre) => `<span class="film-details__genre">${genre}</span>`;
 
-const createFullFilmCardTemplate = (film, comments, commentsLoadingState) => {
+const createFullFilmCardTemplate = (data, comments) => {
   const {
     comments: commentsIds,
     info: {
@@ -107,9 +147,17 @@ const createFullFilmCardTemplate = (film, comments, commentsLoadingState) => {
       isOnWatchlist,
     },
     newComment,
-  } = film;
+    viewState: {
+      [FilmCardStateType.COMMENTS_LOADING]: commentsLoadingState,
+      [FilmCardStateType.COMMENT_ADDING]: commentAddingState,
+      [FilmCardStateType.COMMENTS_IDS_TO_DELETE]: commentsIdsToDelete,
+      [FilmCardStateType.META_UPDATING]: metaUpdatingState,
+    },
+  } = data;
 
-  return `<section class="film-details">
+  const hasMetaUpdating = metaUpdatingState === ViewStateValue.PROCESSING;
+
+  return `<section class="${ClassNames.MAIN}">
     <form class="${ClassNames.FORM}" action="" method="get">
       <div class="film-details__top-container">
         <div class="film-details__close">
@@ -172,9 +220,9 @@ const createFullFilmCardTemplate = (film, comments, commentsLoadingState) => {
         </div>
 
         <section class="film-details__controls">
-          <button type="button" class="film-details__control-button ${ClassNames.ADD_TO_WATCHLIST_CONTROL} ${setActiveClass(isOnWatchlist, ClassNames.CONTROL_ACTIVE_STATE)}" id="watchlist" name="watchlist">Add to watchlist</button>
-          <button type="button" class="film-details__control-button ${ClassNames.MARK_AS_WATCHED_CONTROL} ${setActiveClass(isWatched, ClassNames.CONTROL_ACTIVE_STATE)}" id="watched" name="watched">Already watched</button>
-          <button type="button" class="film-details__control-button ${ClassNames.MARK_AS_FAVORITE_CONTROL} ${setActiveClass(isFavorite, ClassNames.CONTROL_ACTIVE_STATE)}" id="favorite" name="favorite">Add to favorites</button>
+          <button type="button" class="film-details__control-button ${ClassNames.ADD_TO_WATCHLIST_CONTROL} ${setActiveClass(isOnWatchlist, ClassNames.CONTROL_ACTIVE_STATE)}" id="watchlist" name="watchlist" ${hasMetaUpdating ? 'disabled' : ''}>Add to watchlist</button>
+          <button type="button" class="film-details__control-button ${ClassNames.MARK_AS_WATCHED_CONTROL} ${setActiveClass(isWatched, ClassNames.CONTROL_ACTIVE_STATE)}" id="watched" name="watched" ${hasMetaUpdating ? 'disabled' : ''}>Already watched</button>
+          <button type="button" class="film-details__control-button ${ClassNames.MARK_AS_FAVORITE_CONTROL} ${setActiveClass(isFavorite, ClassNames.CONTROL_ACTIVE_STATE)}" id="favorite" name="favorite" ${hasMetaUpdating ? 'disabled' : ''}>Add to favorites</button>
         </section>
       </div>
 
@@ -182,21 +230,9 @@ const createFullFilmCardTemplate = (film, comments, commentsLoadingState) => {
         <section class="film-details__comments-wrap">
           <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${commentsIds.length}</span></h3>
 
-          ${createCommentsTemplate(comments, commentsIds, commentsLoadingState)}
+          ${createCommentsTemplate(comments, commentsIds, commentsLoadingState, commentsIdsToDelete)}
 
-          <div class="film-details__new-comment">
-            <div class="film-details__add-emoji-label">
-              ${createSelectedEmojiTemplate(newComment.isEmojiSelected, newComment.emoji)}
-            </div>
-
-            <label class="film-details__comment-label">
-              <textarea class="${ClassNames.NEW_COMMENT_FIELD}" placeholder="Select reaction below and write comment here" name="comment">${newComment.text}</textarea>
-            </label>
-
-            <div class="${ClassNames.NEW_COMMENT_EMOJI_LIST}">
-              ${EMOJIS.map((emoji) => createEmojiTemplate(emoji, emoji === newComment.emoji)).join(' ')}
-            </div>
-          </div>
+          ${createNewCommentTemplate(newComment, commentAddingState)}
         </section>
       </div>
     </form>
@@ -207,14 +243,10 @@ export default class FullFilmCard extends AbstractFilmCardView {
   constructor(film, comments) {
     super(film);
 
-    this._data = FullFilmCard.parseFilmToData(this._film);
-
     this._comments = comments;
-    this._commentsLoadingState = CommentsLoadingState.LOADING;
-
     this._scrollPosition = 0;
-
     this._defaultNewCommentFieldBorderStyle = this._getNewCommentFieldElement().style.border;
+    this._data = this._getDefaultData();
 
     this._onCloseButtonClick = this._onCloseButtonClick.bind(this);
     this._onNewCommentFieldInput = this._onNewCommentFieldInput.bind(this);
@@ -223,33 +255,29 @@ export default class FullFilmCard extends AbstractFilmCardView {
     this._onNewCommentFieldSubmit = this._onNewCommentFieldSubmit.bind(this);
   }
 
-  init(film, isNewModal, comments, commentsLoadingState) {
-    this._comments = comments;
-
-    if (commentsLoadingState) {
-      this._commentsLoadingState = commentsLoadingState;
+  init(film, isNewModal, comments) {
+    if (comments) {
+      this._comments = comments;
     }
-
-    const currentNewComment = !isNewModal
-      ? Object.assign({}, {
-        newComment: this._data.newComment,
-      })
-      : null;
 
     this._film = film;
     this.filmId = this._film.id;
-    this._resetData();
-    this._updateData(currentNewComment, false);
+    this._resetFilmData();
+
+    if (isNewModal) {
+      this.resetNewCommentData();
+      this._resetViewStateData();
+    }
 
     this._setInnerListeners();
   }
 
   _getTemplate() {
-    return createFullFilmCardTemplate(this._data, this._comments, this._commentsLoadingState);
+    return createFullFilmCardTemplate(this._data, this._comments);
   }
 
   isElementRendered() {
-    return Boolean(this._element);
+    return Boolean(document.querySelector(`.${ClassNames.MAIN}`));
   }
 
   saveScrollPosition() {
@@ -266,29 +294,146 @@ export default class FullFilmCard extends AbstractFilmCardView {
     this.restoreScrollPosition();
   }
 
-  static parseFilmToData(film) {
+  _shake(element) {
+    element.style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+
+    setTimeout(() => {
+      element.style.animation = '';
+    }, SHAKE_ANIMATION_TIMEOUT);
+  }
+
+  shakeNewCommentForm() {
+    this._shake(this._getNewCommentFormElement());
+  }
+
+  shakeComment(commentId) {
+    this._shake(this._getCommentElement(commentId));
+  }
+
+  _getDefaultData() {
     return Object.assign(
       {},
-      film,
+      this._film,
       {
-        newComment: {
-          text: '',
-          isEmojiSelected: false,
-          emoji: '',
-        },
+        newComment: Object.assign({}, this._getDefaultNewCommentStructure()),
+        viewState: Object.assign({}, this._getDefaultViewStateStructure()),
       },
     );
   }
 
-  _resetData() {
-    this._data = FullFilmCard.parseFilmToData(this._film);
+  _getDefaultNewCommentStructure() {
+    return {
+      text: '',
+      isEmojiSelected: false,
+      emoji: '',
+    };
   }
 
-  _getCurrentNewCommentText () {
+  _getDefaultViewStateStructure() {
+    return {
+      [FilmCardStateType.COMMENTS_LOADING]: ViewStateValue.PROCESSING,
+      [FilmCardStateType.COMMENT_ADDING]: ViewStateValue.NO_PROCESSING,
+      [FilmCardStateType.COMMENTS_IDS_TO_DELETE]: new Set(),
+      [FilmCardStateType.META_UPDATING]: ViewStateValue.NO_PROCESSING,
+    };
+  }
+
+  setViewState(stateType, updatedState, isElementUpdating, options) {
+    if (options) {
+      if (options.comments) {
+        this._comments = options.comments;
+      }
+
+      if (options.commentIdToDelete) {
+        this._data.viewState[FilmCardStateType.COMMENTS_IDS_TO_DELETE].add(Number(options.commentIdToDelete));
+      }
+    }
+
+    super.setViewState(stateType, updatedState, isElementUpdating);
+  }
+
+  removeIdFromCommentsToDeleteState(commentId) {
+    this._data.viewState[FilmCardStateType.COMMENTS_IDS_TO_DELETE].delete(Number(commentId));
+  }
+
+  _setNewCommentTextState(text, isElementUpdating) {
+    const newData = {
+      newComment: Object.assign(
+        {},
+        this._data.newComment,
+        {
+          text,
+        },
+      ),
+    };
+
+    this._updateData(newData, isElementUpdating);
+  }
+
+  _setNewCommentIsEmojiSelectedState(isEmojiSelected, isElementUpdating) {
+    const newData = {
+      newComment: Object.assign(
+        {},
+        this._data.newComment,
+        {
+          isEmojiSelected,
+        },
+      ),
+    };
+
+    this._updateData(newData, isElementUpdating);
+  }
+
+  _setNewCommentSelectedEmojiState(emoji, isElementUpdating) {
+    const newData = {
+      newComment: Object.assign(
+        {},
+        this._data.newComment,
+        {
+          emoji,
+        },
+      ),
+    };
+
+    this._updateData(newData, isElementUpdating);
+  }
+
+  _resetFilmData(isElementUpdating) {
+    const defaultData = Object.assign({}, this._film);
+
+    this._updateData(defaultData, isElementUpdating);
+  }
+
+  resetNewCommentData(isElementUpdating) {
+    const defaultData = {
+      newComment: this._getDefaultNewCommentStructure(),
+    };
+
+    this._updateData(defaultData, isElementUpdating);
+  }
+
+  _resetViewStateData(isElementUpdating) {
+    const defaultData = {
+      viewState: this._getDefaultViewStateStructure(),
+    };
+
+    this._updateData(defaultData, isElementUpdating);
+  }
+
+  _getCurrentNewCommentData() {
+    return {
+      newComment: Object.assign(
+        {},
+        this._data.newComment,
+      ),
+    };
+  }
+
+  _getCurrentNewCommentText() {
     return this._data.newComment.text.trim();
   }
 
-  _getCurrentNewCommentEmoji () {
+  _getCurrentNewCommentEmoji() {
     return this._data.newComment.emoji;
   }
 
@@ -326,9 +471,11 @@ export default class FullFilmCard extends AbstractFilmCardView {
   }
 
   _showNewCommentValidationError(message, borderStyle) {
-    this._getNewCommentFieldElement().style.border = borderStyle;
-    this._getNewCommentFieldElement().setCustomValidity(message);
-    this._getNewCommentFieldElement().reportValidity();
+    const newCommentFieldElement = this._getNewCommentFieldElement();
+
+    newCommentFieldElement.style.border = borderStyle;
+    newCommentFieldElement.setCustomValidity(message);
+    newCommentFieldElement.reportValidity();
   }
 
   _hideNewCommentValidationError() {
@@ -365,6 +512,14 @@ export default class FullFilmCard extends AbstractFilmCardView {
     return this.getElement().querySelector(`.${ClassNames.COMMENTS_LIST}`);
   }
 
+  _getCommentElement(commentId) {
+    return this.getElement().querySelector(`.${ClassNames.COMMENT}[data-comment-id="${commentId}"]`);
+  }
+
+  _getNewCommentFormElement() {
+    return this.getElement().querySelector(`.${ClassNames.NEW_COMMENT_FORM}`);
+  }
+
   _getNewCommentFieldElement() {
     return this.getElement().querySelector(`.${ClassNames.NEW_COMMENT_FIELD}`);
   }
@@ -396,15 +551,7 @@ export default class FullFilmCard extends AbstractFilmCardView {
   _onNewCommentFieldInput(evt) {
     evt.preventDefault();
 
-    this._updateData({
-      newComment: Object.assign(
-        {},
-        this._data.newComment,
-        {
-          text: evt.target.value,
-        },
-      ),
-    }, false);
+    this._setNewCommentTextState(evt.target.value,false);
 
     this._checkNewCommentField(false);
   }
@@ -416,6 +563,10 @@ export default class FullFilmCard extends AbstractFilmCardView {
 
     evt.preventDefault();
 
+    if (this._data.viewState[FilmCardStateType.COMMENT_ADDING] === ViewStateValue.PROCESSING) {
+      return;
+    }
+
     const selectedEmoji = evt.target.value;
 
     if (selectedEmoji === this._data.newComment.emoji) {
@@ -423,26 +574,10 @@ export default class FullFilmCard extends AbstractFilmCardView {
     }
 
     if (!this._data.newComment.isEmojiSelected) {
-      this._updateData({
-        newComment: Object.assign(
-          {},
-          this._data.newComment,
-          {
-            isEmojiSelected: true,
-          },
-        ),
-      }, false);
+      this._setNewCommentIsEmojiSelectedState(true, false);
     }
 
-    this._updateData({
-      newComment: Object.assign(
-        {},
-        this._data.newComment,
-        {
-          emoji: selectedEmoji,
-        },
-      ),
-    }, true);
+    this._setNewCommentSelectedEmojiState(selectedEmoji, true);
   }
 
   _onNewCommentFieldSubmit(evt) {
@@ -459,9 +594,7 @@ export default class FullFilmCard extends AbstractFilmCardView {
     const commentText = this._getCurrentNewCommentText();
     const commentEmoji = this._getCurrentNewCommentEmoji();
 
-    this._resetData();
-
-    this._callback.newCommentFieldSubmit({ commentText, commentEmoji });
+    this._callback.newCommentFieldSubmit({ text: commentText, emoji: commentEmoji });
   }
 
   // Сеттеры листенеров ↓↓↓
@@ -492,7 +625,6 @@ export default class FullFilmCard extends AbstractFilmCardView {
   _setInnerListeners() {
     this._setNewCommentEmojiListClickListener();
     this._setNewCommentFieldInputListener();
-
   }
 
   _restoreListeners() {

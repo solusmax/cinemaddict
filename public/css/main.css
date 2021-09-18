@@ -462,6 +462,7 @@ button {
 .film-card__controls-item:disabled,
 .film-card__controls-item:disabled:hover {
   opacity: 1;
+  cursor: default;
 }
 
 .film-card__controls-item--add-to-watchlist {
@@ -744,6 +745,7 @@ button {
 }
 .film-details__control-button:disabled {
   opacity: 1;
+  cursor: default;
 }
 .film-details__control-button::before {
   content: '';
@@ -808,6 +810,9 @@ button {
   background-color: rgba(255, 255, 255, 0.1);
   margin-right: 14px;
 }
+.film-details__add-emoji-label--disabled {
+  opacity: 0.6;
+}
 .film-details__emoji-label {
   width: 40px;
   height: 40px;
@@ -826,6 +831,16 @@ button {
 }
 .film-details__emoji-item:checked + .film-details__emoji-label {
   opacity: 1;
+}
+.film-details__emoji-item:disabled + .film-details__emoji-label {
+  cursor: default;
+}
+.film-details__emoji-item:disabled:hover + .film-details__emoji-label {
+  opacity: 0.5;
+}
+.film-details__emoji-item:disabled:checked + .film-details__emoji-label,
+.film-details__emoji-item:disabled:checked:hover + .film-details__emoji-label {
+  opacity: 0.8;
 }
 .film-details__comments-wrap {
   width: 630px;
@@ -893,6 +908,11 @@ button {
 .film-details__comment-delete:hover {
   opacity: 0.7;
 }
+.film-details__comment-delete:disabled {
+  opacity: 0.7;
+  text-decoration: none;
+  cursor: default;
+}
 .film-details__comment-input {
   width: 100%;
   height: 50px;
@@ -906,6 +926,10 @@ button {
   font-size: 20px;
   resize: none;
   outline: none;
+}
+.film-details__comment-input:disabled {
+  opacity: 0.7;
+  cursor: default;
 }
 .film-details__comment-input::placeholder {
   color: #212126;
@@ -1140,4 +1164,26 @@ button {
   font-weight: normal;
   font-size: 15px;
   color: #ffffff;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
 }

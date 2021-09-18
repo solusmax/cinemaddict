@@ -11,7 +11,10 @@ import UserRank from './presenter/user-rank';
 
 import Api from './api.js';
 import { renderElement } from './utils';
-import { UpdateTypes } from './constants.js';
+import {
+  ErrorMessage,
+  UpdateTypes
+} from './constants.js';
 
 const siteHeaderElement = document.querySelector('.header');
 const siteFooterElement = document.querySelector('.footer');
@@ -29,14 +32,13 @@ const filtersModel = new FiltersModel();
 const filmsListPresenter = new FilmsListPresenter(siteMainElement, filmsModel, commentsModel, filtersModel, api);
 filmsListPresenter.init();
 
-
 api.getFilms()
   .then((films) => {
     filmsModel.setFilms(UpdateTypes.INIT, films);
   })
   .catch(() => {
     filmsModel.setFilms(UpdateTypes.INIT, []);
-    ErrorAlertPresenter.renderErrorAlert('Error loading films');
+    ErrorAlertPresenter.renderErrorAlert(ErrorMessage.FILMS_LOADING);
   })
   .finally(() => {
     const siteMenuPresenter = new SiteMenuPresenter(siteMainElement, siteMainElement, filmsListPresenter, filmsModel, filtersModel);

@@ -1,4 +1,8 @@
 import SmartAbstractView from './smart-abstract.js';
+import {
+  FilmCardStateType,
+  ViewStateValue
+} from '../constants.js';
 
 export default class AbstractFilmCard extends SmartAbstractView {
   constructor(film) {
@@ -10,6 +14,7 @@ export default class AbstractFilmCard extends SmartAbstractView {
 
     this._film = film;
     this._filmId = this._film.id;
+    this._data = this._getDefaultData();
 
     this._onAddToWatchlistButtonClick = this._onAddToWatchlistButtonClick.bind(this);
     this._onMarkAsWatchedButtonClick = this._onMarkAsWatchedButtonClick.bind(this);
@@ -24,16 +29,36 @@ export default class AbstractFilmCard extends SmartAbstractView {
     this._filmId = id;
   }
 
-  disableMetaButtons() {
-    this._getAddToWatchlistButtonElement().disabled = true;
-    this._getMarkAsWatchedButtonElement().disabled = true;
-    this._getMarkAsFavoriteButtonElement().disabled = true;
+  _getDefaultData() {
+    return Object.assign(
+      {},
+      this._film,
+      {
+        viewState: Object.assign({}, this._getDefaultViewStateStructure()),
+      },
+    );
   }
 
-  enableMetaButtons() {
-    this._getAddToWatchlistButtonElement().disabled = false;
-    this._getMarkAsWatchedButtonElement().disabled = false;
-    this._getMarkAsFavoriteButtonElement().disabled = false;
+  _getDefaultViewStateStructure() {
+    return {
+      [FilmCardStateType.META_UPDATING]: ViewStateValue.NO_PROCESSING,
+    };
+  }
+
+  setViewState(stateType, updatedState, isElementUpdating) {
+    const newData = stateType && updatedState
+      ? {
+        viewState: Object.assign(
+          {},
+          this._data.viewState,
+          {
+            [stateType]: updatedState,
+          },
+        ),
+      }
+      : {};
+
+    this._updateData(newData, isElementUpdating);
   }
 
   // Геттеры элементов ↓↓↓
