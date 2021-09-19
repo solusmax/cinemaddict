@@ -63,7 +63,7 @@ export const MainListTitleText = {
 
 export const FilmCardStateType = {
   COMMENT_ADDING: 'commentAdding',
-  COMMENTS_IDS_TO_DELETE: 'commentToDeleteId',
+  COMMENTS_IDS_TO_DELETE: 'commentsIdsToDelete',
   COMMENTS_LOADING: 'commentsLoading',
   META_UPDATING: 'metaUpdating',
 };

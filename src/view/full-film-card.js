@@ -266,7 +266,7 @@ export default class FullFilmCard extends AbstractFilmCardView {
 
     if (isNewModal) {
       this.resetNewCommentData();
-      this._resetViewStateData();
+      this._resetViewStateData(false, [FilmCardStateType.COMMENTS_IDS_TO_DELETE]);
     }
 
     this._setInnerListeners();
@@ -295,6 +295,10 @@ export default class FullFilmCard extends AbstractFilmCardView {
   }
 
   _shake(element) {
+    if (!element) {
+      return;
+    }
+
     element.style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
 
     setTimeout(() => {
@@ -412,10 +416,14 @@ export default class FullFilmCard extends AbstractFilmCardView {
     this._updateData(defaultData, isElementUpdating);
   }
 
-  _resetViewStateData(isElementUpdating) {
+  _resetViewStateData(isElementUpdating, excludedFromResetStateTypes = []) {
     const defaultData = {
       viewState: this._getDefaultViewStateStructure(),
     };
+
+    excludedFromResetStateTypes.forEach((stateType) => {
+      defaultData.viewState[stateType] = this._data.viewState[stateType];
+    });
 
     this._updateData(defaultData, isElementUpdating);
   }

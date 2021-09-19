@@ -47,6 +47,7 @@ export default class FilmsList {
     this._renderedMainFilmCardsCount = FILMS_COUNT_PER_STEP;
     this._renderedFilmCardComponents = [];
     this._currentSortMethod = SortMethods.DEFAULT;
+    this._isFullFilmCardChanged = false;
 
     this._filmsModel = filmsModel;
     this._commentsModel = commentsModel;
@@ -478,8 +479,6 @@ export default class FilmsList {
   // Хэндлеры и колбэки ↓↓↓
 
   _handleViewAction(actionType, updateType, update) {
-    const initialFullFilmCardId = this._getCurrentFullFilmCardId();
-
     switch (actionType) {
       case UserActions.UPDATE_FILM:
         this._disableFilmCardMetaButtons(update, true);
@@ -528,15 +527,13 @@ export default class FilmsList {
         break;
 
       case UserActions.DELETE_COMMENT:
+        this._isFullFilmCardChanged = false;
         this._updateFullFilmCardState(null, null, FullFilmCardRenderUpdateType.UPDATE, { commentIdToDelete: update[1] });
 
         this._api.deleteComment(update[1])
           .then(() => {
-            const currentFullFilmCardId = this._getCurrentFullFilmCardId();
-            const isFullFilmCardChanged = initialFullFilmCardId !== currentFullFilmCardId;
-
             this._updateFullFilmCardState(null, null, FullFilmCardRenderUpdateType.NO_UPDATE);
-            this._commentsModel.deleteComment(updateType, !isFullFilmCardChanged, ...update);
+            this._commentsModel.deleteComment(updateType, !this._isFullFilmCardChanged, ...update);
             this._fullFilmCardComponent.removeIdFromCommentsToDeleteState(update[1]);
           })
           .catch(() => {
@@ -658,6 +655,8 @@ export default class FilmsList {
   }
 
   _handleOpenFullFilmCardClick(film) {
+    this._isFullFilmCardChanged = true;
+
     this._api.cancelCurrentLoadingComments();
     this._commentsModel.comments = [];
 
