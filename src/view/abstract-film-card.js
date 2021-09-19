@@ -1,11 +1,7 @@
 import SmartAbstractView from './smart-abstract.js';
-import {
-  FilmCardStateType,
-  ViewStateValue
-} from '../constants.js';
 
 export default class AbstractFilmCard extends SmartAbstractView {
-  constructor(film) {
+  constructor(film, updatingUserMetaFilmsIds) {
     super();
 
     if (new.target === AbstractFilmCard) {
@@ -14,7 +10,7 @@ export default class AbstractFilmCard extends SmartAbstractView {
 
     this._film = film;
     this._filmId = this._film.id;
-    this._data = this._getDefaultData();
+    this._updatingUserMetaFilmsIds = updatingUserMetaFilmsIds;
 
     this._onAddToWatchlistButtonClick = this._onAddToWatchlistButtonClick.bind(this);
     this._onMarkAsWatchedButtonClick = this._onMarkAsWatchedButtonClick.bind(this);
@@ -27,38 +23,6 @@ export default class AbstractFilmCard extends SmartAbstractView {
 
   set filmId(id) {
     this._filmId = id;
-  }
-
-  _getDefaultData() {
-    return Object.assign(
-      {},
-      this._film,
-      {
-        viewState: Object.assign({}, this._getDefaultViewStateStructure()),
-      },
-    );
-  }
-
-  _getDefaultViewStateStructure() {
-    return {
-      [FilmCardStateType.META_UPDATING]: ViewStateValue.NO_PROCESSING,
-    };
-  }
-
-  setViewState(stateType, updatedState, isElementUpdating) {
-    const newData = stateType && updatedState
-      ? {
-        viewState: Object.assign(
-          {},
-          this._data.viewState,
-          {
-            [stateType]: updatedState,
-          },
-        ),
-      }
-      : {};
-
-    this._updateData(newData, isElementUpdating);
   }
 
   // Геттеры элементов ↓↓↓

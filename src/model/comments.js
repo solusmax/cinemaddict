@@ -45,6 +45,7 @@ export default class Comments extends AbstractObserver {
       {},
       comment,
       {
+        id: Number(comment['id']),
         emoji: comment['emotion'],
         text: comment['comment'],
       },
@@ -61,6 +62,7 @@ export default class Comments extends AbstractObserver {
       {},
       comment,
       {
+        'id': String(comment.id),
         'emotion': comment.emoji,
         'comment': comment.text,
       },

@@ -7,7 +7,7 @@ import FooterStatisticsView from './view/footer-statistics.js';
 import ErrorAlertPresenter from './presenter/error-alert.js';
 import FilmsListPresenter from './presenter/films-list.js';
 import SiteMenuPresenter from './presenter/site-menu.js';
-import UserRank from './presenter/user-rank';
+import UserRank from './presenter/user-rank.js';
 
 import Api from './api.js';
 import { renderElement } from './utils';

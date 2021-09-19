@@ -56,7 +56,7 @@ const createCommentTemplate = (comments, id, commentsIdsToDelete) => {
     date,
   } = currentComment;
 
-  const isDeleting = commentsIdsToDelete.has(Number(id));
+  const isDeleting = commentsIdsToDelete.has(id);
 
   return (
     `<li class="${ClassNames.COMMENT}" data-comment-id="${id}">
@@ -123,8 +123,9 @@ const createNewCommentTemplate = (newComment, commentAddingState) => {
 
 const createGenreTemplate = (genre) => `<span class="film-details__genre">${genre}</span>`;
 
-const createFullFilmCardTemplate = (data, comments) => {
+const createFullFilmCardTemplate = (data, comments, updatingUserMetaFilmsIds) => {
   const {
+    id,
     comments: commentsIds,
     info: {
       poster,
@@ -151,11 +152,10 @@ const createFullFilmCardTemplate = (data, comments) => {
       [FilmCardStateType.COMMENTS_LOADING]: commentsLoadingState,
       [FilmCardStateType.COMMENT_ADDING]: commentAddingState,
       [FilmCardStateType.COMMENTS_IDS_TO_DELETE]: commentsIdsToDelete,
-      [FilmCardStateType.META_UPDATING]: metaUpdatingState,
     },
   } = data;
 
-  const hasMetaUpdating = metaUpdatingState === ViewStateValue.PROCESSING;
+  const hasUserMetaUpdating = updatingUserMetaFilmsIds.has(id);
 
   return `<section class="${ClassNames.MAIN}">
     <form class="${ClassNames.FORM}" action="" method="get">
@@ -220,9 +220,9 @@ const createFullFilmCardTemplate = (data, comments) => {
         </div>
 
         <section class="film-details__controls">
-          <button type="button" class="film-details__control-button ${ClassNames.ADD_TO_WATCHLIST_CONTROL} ${setActiveClass(isOnWatchlist, ClassNames.CONTROL_ACTIVE_STATE)}" id="watchlist" name="watchlist" ${hasMetaUpdating ? 'disabled' : ''}>Add to watchlist</button>
-          <button type="button" class="film-details__control-button ${ClassNames.MARK_AS_WATCHED_CONTROL} ${setActiveClass(isWatched, ClassNames.CONTROL_ACTIVE_STATE)}" id="watched" name="watched" ${hasMetaUpdating ? 'disabled' : ''}>Already watched</button>
-          <button type="button" class="film-details__control-button ${ClassNames.MARK_AS_FAVORITE_CONTROL} ${setActiveClass(isFavorite, ClassNames.CONTROL_ACTIVE_STATE)}" id="favorite" name="favorite" ${hasMetaUpdating ? 'disabled' : ''}>Add to favorites</button>
+          <button type="button" class="film-details__control-button ${ClassNames.ADD_TO_WATCHLIST_CONTROL} ${setActiveClass(isOnWatchlist, ClassNames.CONTROL_ACTIVE_STATE)}" id="watchlist" name="watchlist" ${hasUserMetaUpdating ? 'disabled' : ''}>Add to watchlist</button>
+          <button type="button" class="film-details__control-button ${ClassNames.MARK_AS_WATCHED_CONTROL} ${setActiveClass(isWatched, ClassNames.CONTROL_ACTIVE_STATE)}" id="watched" name="watched" ${hasUserMetaUpdating ? 'disabled' : ''}>Already watched</button>
+          <button type="button" class="film-details__control-button ${ClassNames.MARK_AS_FAVORITE_CONTROL} ${setActiveClass(isFavorite, ClassNames.CONTROL_ACTIVE_STATE)}" id="favorite" name="favorite" ${hasUserMetaUpdating ? 'disabled' : ''}>Add to favorites</button>
         </section>
       </div>
 
@@ -240,13 +240,13 @@ const createFullFilmCardTemplate = (data, comments) => {
 };
 
 export default class FullFilmCard extends AbstractFilmCardView {
-  constructor(film, comments) {
-    super(film);
+  constructor(film, comments, updatingUserMetaFilmsIds) {
+    super(film, updatingUserMetaFilmsIds);
 
+    this._data = this._getDefaultData();
     this._comments = comments;
     this._scrollPosition = 0;
     this._defaultNewCommentFieldBorderStyle = this._getNewCommentFieldElement().style.border;
-    this._data = this._getDefaultData();
 
     this._onCloseButtonClick = this._onCloseButtonClick.bind(this);
     this._onNewCommentFieldInput = this._onNewCommentFieldInput.bind(this);
@@ -276,7 +276,7 @@ export default class FullFilmCard extends AbstractFilmCardView {
   }
 
   _getTemplate() {
-    return createFullFilmCardTemplate(this._data, this._comments);
+    return createFullFilmCardTemplate(this._data, this._comments, this._updatingUserMetaFilmsIds);
   }
 
   isElementRendered() {
@@ -341,7 +341,6 @@ export default class FullFilmCard extends AbstractFilmCardView {
       [FilmCardStateType.COMMENTS_LOADING]: ViewStateValue.PROCESSING,
       [FilmCardStateType.COMMENT_ADDING]: ViewStateValue.NO_PROCESSING,
       [FilmCardStateType.COMMENTS_IDS_TO_DELETE]: new Set(),
-      [FilmCardStateType.META_UPDATING]: ViewStateValue.NO_PROCESSING,
     };
   }
 
@@ -352,15 +351,27 @@ export default class FullFilmCard extends AbstractFilmCardView {
       }
 
       if (options.commentIdToDelete) {
-        this._data.viewState[FilmCardStateType.COMMENTS_IDS_TO_DELETE].add(Number(options.commentIdToDelete));
+        this._data.viewState[FilmCardStateType.COMMENTS_IDS_TO_DELETE].add(options.commentIdToDelete);
       }
     }
 
-    super.setViewState(stateType, updatedState, isElementUpdating);
+    const newData = stateType && updatedState
+      ? {
+        viewState: Object.assign(
+          {},
+          this._data.viewState,
+          {
+            [stateType]: updatedState,
+          },
+        ),
+      }
+      : {};
+
+    this._updateData(newData, isElementUpdating);
   }
 
   removeIdFromCommentsToDeleteState(commentId) {
-    this._data.viewState[FilmCardStateType.COMMENTS_IDS_TO_DELETE].delete(Number(commentId));
+    this._data.viewState[FilmCardStateType.COMMENTS_IDS_TO_DELETE].delete(commentId);
   }
 
   _setNewCommentTextState(text, isElementUpdating) {

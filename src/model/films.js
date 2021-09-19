@@ -124,8 +124,10 @@ export default class Films extends AbstractObserver {
       {},
       film,
       {
+        id: Number(film['id']),
         info: adaptedFilmInfo,
         userMeta: adaptedUserDetials,
+        comments: film['comments'].slice().map((commentId) => Number(commentId)),
       },
     );
 
@@ -185,11 +187,10 @@ export default class Films extends AbstractObserver {
       {},
       film,
       {
+        'id': String(film.id),
         'film_info': adaptedInfo,
         'user_details': adaptedUserMeta,
-
-        info: adaptedInfo,
-        userMeta: adaptedUserMeta,
+        'comments': film.comments.slice().map((commentId) => String(commentId)),
       },
     );
 

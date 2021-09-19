@@ -5,10 +5,6 @@ import {
   getYearFromDate,
   setActiveClass
 } from '../utils';
-import {
-  FilmCardStateType,
-  ViewStateValue
-} from '../constants.js';
 
 const MAX_LETTERS_IN_SHORT_DESCRIPTION = 140;
 
@@ -26,8 +22,9 @@ const getShortDescription = (description) => description.length > MAX_LETTERS_IN
   ? `${description.slice(0, MAX_LETTERS_IN_SHORT_DESCRIPTION - 1).trim()}…`
   : description;
 
-const createFilmCardTemplate = (data) => {
+const createFilmCardTemplate = (film, updatingUserMetaFilmsIds) => {
   const {
+    id,
     comments: commentsIds,
     info: {
       poster,
@@ -43,12 +40,9 @@ const createFilmCardTemplate = (data) => {
       isFavorite,
       isOnWatchlist,
     },
-    viewState: {
-      [FilmCardStateType.META_UPDATING]: metaUpdatingState,
-    },
-  } = data;
+  } = film;
 
-  const hasMetaUpdating = metaUpdatingState === ViewStateValue.PROCESSING;
+  const hasUserMetaUpdating = updatingUserMetaFilmsIds.has(id);
 
   return (
     `<article class="film-card">
@@ -63,17 +57,17 @@ const createFilmCardTemplate = (data) => {
       <p class="film-card__description">${getShortDescription(description)}</p>
       <a class="film-card__comments">${commentsIds.length} comment${addPluralEnding(commentsIds.length)}</a>
       <div class="film-card__controls">
-        <button class="film-card__controls-item ${ClassNames.ADD_TO_WATCHLIST_CONTROL} ${setActiveClass(isOnWatchlist, ClassNames.CONTROL_ACTIVE_STATE)}" type="button" ${hasMetaUpdating ? 'disabled' : ''}>Add to watchlist</button>
-        <button class="film-card__controls-item ${ClassNames.MARK_AS_WATCHED_CONTROL} ${setActiveClass(isWatched, ClassNames.CONTROL_ACTIVE_STATE)}" type="button" ${hasMetaUpdating ? 'disabled' : ''}>Mark as watched</button>
-        <button class="film-card__controls-item ${ClassNames.MARK_AS_FAVORITE_CONTROL} ${setActiveClass(isFavorite, ClassNames.CONTROL_ACTIVE_STATE)}" type="button" ${hasMetaUpdating ? 'disabled' : ''}>Mark as favorite</button>
+        <button class="film-card__controls-item ${ClassNames.ADD_TO_WATCHLIST_CONTROL} ${setActiveClass(isOnWatchlist, ClassNames.CONTROL_ACTIVE_STATE)}" type="button" ${hasUserMetaUpdating ? 'disabled' : ''}>Add to watchlist</button>
+        <button class="film-card__controls-item ${ClassNames.MARK_AS_WATCHED_CONTROL} ${setActiveClass(isWatched, ClassNames.CONTROL_ACTIVE_STATE)}" type="button" ${hasUserMetaUpdating ? 'disabled' : ''}>Mark as watched</button>
+        <button class="film-card__controls-item ${ClassNames.MARK_AS_FAVORITE_CONTROL} ${setActiveClass(isFavorite, ClassNames.CONTROL_ACTIVE_STATE)}" type="button" ${hasUserMetaUpdating ? 'disabled' : ''}>Mark as favorite</button>
       </div>
     </article>`
   );
 };
 
 export default class FilmCard extends AbstractFilmCardView {
-  constructor(film) {
-    super(film);
+  constructor(film, updatingUserMetaFilmsIds) {
+    super(film, updatingUserMetaFilmsIds);
 
     this._onCommentsLinkClick = this._onCommentsLinkClick.bind(this);
     this._onPosterClick = this._onPosterClick.bind(this);
@@ -81,7 +75,7 @@ export default class FilmCard extends AbstractFilmCardView {
   }
 
   _getTemplate() {
-    return createFilmCardTemplate(this._data);
+    return createFilmCardTemplate(this._film, this._updatingUserMetaFilmsIds);
   }
 
   // Геттеры элементов ↓↓↓
