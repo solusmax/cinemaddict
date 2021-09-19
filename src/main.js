@@ -23,6 +23,7 @@ import {
   UpdateTypes
 } from './constants.js';
 
+const AUTHORIZATION = 'Basic z2kabc24s159dsxC';
 const END_POINT = 'https://15.ecmascript.pages.academy/cinemaddict';
 const STORE_PREFIX = 'cinemaddict-localstorage';
 const STORE_VER = 'v15';
