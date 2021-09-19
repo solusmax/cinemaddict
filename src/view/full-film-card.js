@@ -266,7 +266,10 @@ export default class FullFilmCard extends AbstractFilmCardView {
 
     if (isNewModal) {
       this.resetNewCommentData();
-      this._resetViewStateData(false, [FilmCardStateType.COMMENTS_IDS_TO_DELETE]);
+      this._resetViewStateData(false, [
+        FilmCardStateType.COMMENT_ADDING,
+        FilmCardStateType.COMMENTS_IDS_TO_DELETE,
+      ]);
     }
 
     this._setInnerListeners();
