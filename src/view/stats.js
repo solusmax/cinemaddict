@@ -29,11 +29,11 @@ const ClassNames = {
 
 const BAR_HEIGHT = 50;
 
-const renderChart = (statisticCtx, genres) => {
+const renderChart = (statisticContext, genres) => {
   const genreTitles = genres.map((genre) => genre[0]);
   const filmsPerGenreCounts = genres.map((genre) => genre[1]);
 
-  return new Chart(statisticCtx, {
+  return new Chart(statisticContext, {
     plugins: [ChartDataLabels],
     type: 'horizontalBar',
     data: {
@@ -185,9 +185,9 @@ export default class Stats extends SmartAbstractView {
     }
 
     if (this._hasMovie) {
-      this._getStatsChartWrapper().style.height = `${BAR_HEIGHT * this._genresCount}px`;
-      this._getStatsCtx().height = BAR_HEIGHT * this._genresCount;
-      this._chart = renderChart(this._getStatsCtx(), this._genres);
+      this._getStatsChartWrapperElement().style.height = `${BAR_HEIGHT * this._genresCount}px`;
+      this._getStatsChartElement().height = BAR_HEIGHT * this._genresCount;
+      this._chart = renderChart(this._getStatsChartElement(), this._genres);
     }
 
     if (!this._isComponentJustCreated) {
@@ -210,11 +210,11 @@ export default class Stats extends SmartAbstractView {
     return Boolean(document.querySelector(`.${ClassNames.MAIN}`));
   }
 
-  _getStatsCtx() {
+  _getStatsChartElement() {
     return this.getElement().querySelector(`.${ClassNames.STATS_CHART}`);
   }
 
-  _getStatsChartWrapper() {
+  _getStatsChartWrapperElement() {
     return this.getElement().querySelector(`.${ClassNames.STATS_CHART_WRAPPER}`);
   }
 

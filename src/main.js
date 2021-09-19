@@ -7,11 +7,14 @@ import FooterStatisticsView from './view/footer-statistics.js';
 import ErrorAlertPresenter from './presenter/error-alert.js';
 import FilmsListPresenter from './presenter/films-list.js';
 import SiteMenuPresenter from './presenter/site-menu.js';
-import UserRank from './presenter/user-rank';
+import UserRank from './presenter/user-rank.js';
 
 import Api from './api.js';
 import { renderElement } from './utils';
-import { UpdateTypes } from './constants.js';
+import {
+  ErrorMessage,
+  UpdateTypes
+} from './constants.js';
 
 const siteHeaderElement = document.querySelector('.header');
 const siteFooterElement = document.querySelector('.footer');
@@ -29,14 +32,13 @@ const filtersModel = new FiltersModel();
 const filmsListPresenter = new FilmsListPresenter(siteMainElement, filmsModel, commentsModel, filtersModel, api);
 filmsListPresenter.init();
 
-
 api.getFilms()
   .then((films) => {
     filmsModel.setFilms(UpdateTypes.INIT, films);
   })
   .catch(() => {
     filmsModel.setFilms(UpdateTypes.INIT, []);
-    ErrorAlertPresenter.renderErrorAlert('Error loading films');
+    ErrorAlertPresenter.renderErrorAlert(ErrorMessage.FILMS_LOADING);
   })
   .finally(() => {
     const siteMenuPresenter = new SiteMenuPresenter(siteMainElement, siteMainElement, filmsListPresenter, filmsModel, filtersModel);

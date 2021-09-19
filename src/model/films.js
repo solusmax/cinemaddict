@@ -37,19 +37,21 @@ export default class Films extends AbstractObserver {
     this._notify(updateType, updatedFilm);
   }
 
-  addComment(updateType, filmToUpdate, newCommentId) {
+  addComment(updateType, filmToUpdate, updatedComments) {
     const filmIndex = findIndexById(this._films, filmToUpdate.id);
 
     if (filmIndex === -1) {
       throw new Error('Can\'t update unexisting film');
     }
 
-    this._films[filmIndex].comments.push(newCommentId);
+    const updatedCommentsIds = updatedComments.map((comment) => comment.id);
+
+    this._films[filmIndex].comments = updatedCommentsIds;
 
     this._notify(updateType, filmToUpdate);
   }
 
-  deleteComment(updateType, [filmToUpdate, commentIdToDelete]) {
+  deleteComment(updateType, filmToUpdate, commentIdToDelete) {
     const filmIndex = findIndexById(this._films, filmToUpdate.id);
 
     if (filmIndex === -1) {
@@ -64,7 +66,7 @@ export default class Films extends AbstractObserver {
 
     this._films[filmIndex].comments = getArrayWithoutElement(this._films[filmIndex].comments, commentIndex);
 
-    this._notify(updateType, filmToUpdate);
+    this._notify(updateType, this._films[filmIndex]);
   }
 
   hasComments() {
@@ -122,8 +124,10 @@ export default class Films extends AbstractObserver {
       {},
       film,
       {
+        id: Number(film['id']),
         info: adaptedFilmInfo,
         userMeta: adaptedUserDetials,
+        comments: film['comments'].slice().map((commentId) => Number(commentId)),
       },
     );
 
@@ -183,11 +187,10 @@ export default class Films extends AbstractObserver {
       {},
       film,
       {
+        'id': String(film.id),
         'film_info': adaptedInfo,
         'user_details': adaptedUserMeta,
-
-        info: adaptedInfo,
-        userMeta: adaptedUserMeta,
+        'comments': film.comments.slice().map((commentId) => String(commentId)),
       },
     );
 

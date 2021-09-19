@@ -40,13 +40,29 @@ export default class Api {
       body: JSON.stringify(FilmsModel.adaptToServer(film)),
       headers: new Headers({'Content-Type': 'application/json'}),
     })
-      .then(Api.toJSON);
+      .then(Api.toJSON)
+      .then(FilmsModel.adaptToClient);
   }
 
-  cancelCurrentLoadingComments() {
-    if (this._commentsLoadingAbortController) {
-      this._commentsLoadingAbortController.abort();
-    }
+  addComment(film, comment) {
+    return this._load({
+      url: `comments/${film.id}`,
+      method: Methods.POST,
+      body: JSON.stringify(CommentsModel.adaptToServer(comment)),
+      headers: new Headers({'Content-Type': 'application/json'}),
+    })
+      .then(Api.toJSON)
+      .then((response) => ({
+        film: FilmsModel.adaptToClient(response.movie),
+        comments: response.comments.map(CommentsModel.adaptToClient),
+      }));
+  }
+
+  deleteComment(commentId) {
+    return this._load({
+      url: `comments/${commentId}`,
+      method: Methods.DELETE,
+    });
   }
 
   _load({
@@ -64,6 +80,12 @@ export default class Api {
     )
       .then(Api.checkStatus)
       .catch(Api.catchError);
+  }
+
+  cancelCurrentLoadingComments() {
+    if (this._commentsLoadingAbortController) {
+      this._commentsLoadingAbortController.abort();
+    }
   }
 
   static checkStatus(response) {

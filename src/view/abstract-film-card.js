@@ -1,7 +1,7 @@
 import SmartAbstractView from './smart-abstract.js';
 
 export default class AbstractFilmCard extends SmartAbstractView {
-  constructor(film) {
+  constructor(film, updatingUserMetaFilmsIds) {
     super();
 
     if (new.target === AbstractFilmCard) {
@@ -10,6 +10,7 @@ export default class AbstractFilmCard extends SmartAbstractView {
 
     this._film = film;
     this._filmId = this._film.id;
+    this._updatingUserMetaFilmsIds = updatingUserMetaFilmsIds;
 
     this._onAddToWatchlistButtonClick = this._onAddToWatchlistButtonClick.bind(this);
     this._onMarkAsWatchedButtonClick = this._onMarkAsWatchedButtonClick.bind(this);
@@ -22,18 +23,6 @@ export default class AbstractFilmCard extends SmartAbstractView {
 
   set filmId(id) {
     this._filmId = id;
-  }
-
-  disableMetaButtons() {
-    this._getAddToWatchlistButtonElement().disabled = true;
-    this._getMarkAsWatchedButtonElement().disabled = true;
-    this._getMarkAsFavoriteButtonElement().disabled = true;
-  }
-
-  enableMetaButtons() {
-    this._getAddToWatchlistButtonElement().disabled = false;
-    this._getMarkAsWatchedButtonElement().disabled = false;
-    this._getMarkAsFavoriteButtonElement().disabled = false;
   }
 
   // Геттеры элементов ↓↓↓

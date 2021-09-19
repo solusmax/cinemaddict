@@ -61,8 +61,22 @@ export const MainListTitleText = {
   LOADING: 'Loading...',
 };
 
-export const CommentsLoadingState = {
-  LOADING: 'Loading...',
-  LOADED: 'LOADED',
-  ERROR_LOADING: 'Error loading comments',
+export const FilmCardStateType = {
+  COMMENT_ADDING: 'commentAdding',
+  COMMENTS_IDS_TO_DELETE: 'commentsIdsToDelete',
+  COMMENTS_LOADING: 'commentsLoading',
+};
+
+export const ViewStateValue = {
+  NO_PROCESSING: 'NO_PROCESSING',
+  PROCESSING: 'PROCESSING',
+  ERROR: 'ERROR',
+};
+
+export const ErrorMessage = {
+  COMMENTS_LOADING: 'Error loading comments',
+  COMMENT_ADDING: 'Error adding comment',
+  COMMENT_DELETING: 'Error deleting comment',
+  FILMS_LOADING: 'Error loading films',
+  FILM_UPDATING: 'Film update error',
 };
