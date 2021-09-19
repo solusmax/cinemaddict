@@ -5,3 +5,5 @@ export const findIndexById = (array, id, isNotProperty) => array.findIndex((el) 
 export const addPluralEnding = (count) => count !== 1 ? 's' : '';
 
 export const setActiveClass = (activityCondition, className) => activityCondition ? className : '';
+
+export const isOnline = () => window.navigator.onLine;

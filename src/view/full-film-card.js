@@ -10,7 +10,7 @@ import {
 } from '../utils';
 import {
   EMOJIS,
-  ErrorMessage,
+  AlertMessage,
   FilmCardStateType,
   ViewStateValue
 } from '../constants.js';
@@ -84,7 +84,7 @@ const createCommentsTemplate = (comments, commentsIds, commentsLoadingState, com
     case ViewStateValue.PROCESSING:
       return `<ul class="${ClassNames.COMMENTS_LIST}">${COMMENTS_LOADING_TEXT}</ul>`;
     case ViewStateValue.ERROR:
-      return `<ul class="${ClassNames.COMMENTS_LIST}">${ErrorMessage.COMMENTS_LOADING}</ul>`;
+      return `<ul class="${ClassNames.COMMENTS_LIST}">${AlertMessage.ERROR_COMMENTS_LOADING}</ul>`;
   }
 };
 
