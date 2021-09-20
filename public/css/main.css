@@ -1149,16 +1149,15 @@ button {
   padding-top: 50px;
   padding-bottom: 50px;
 }
-.error-alert {
+.alert {
   position: fixed;
   left: 0;
   right: 0;
   top: 0;
   z-index: 10000;
   padding: 10px;
-  background-color: #ad2108;
 }
-.error-alert__title {
+.alert__title {
   margin: 0;
   padding: 0;
   font-weight: normal;

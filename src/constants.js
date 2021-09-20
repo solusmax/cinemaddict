@@ -73,10 +73,21 @@ export const ViewStateValue = {
   ERROR: 'ERROR',
 };
 
-export const ErrorMessage = {
-  COMMENTS_LOADING: 'Error loading comments',
-  COMMENT_ADDING: 'Error adding comment',
-  COMMENT_DELETING: 'Error deleting comment',
-  FILMS_LOADING: 'Error loading films',
-  FILM_UPDATING: 'Film update error',
+export const AlertMessage = {
+  ERROR_COMMENTS_LOADING: 'Error loading comments',
+  ERROR_COMMENT_ADDING: 'Error adding comment',
+  ERROR_COMMENT_DELETING: 'Error deleting comment',
+  ERROR_FILMS_LOADING: 'Error loading films',
+  ERROR_FILM_UPDATING: 'Film update error',
+  OFFLINE_ON: 'Offline mode is enabled',
+  ONLINE_ON: 'Back online',
+  WARNING_COMMENTS_LOADING_OFFLINE: 'Comments are not available offline',
+  WARNING_COMMENT_ADDING_OFFLINE: 'You can\'t comment offline',
+  WARNING_COMMENT_DELETING_OFFLINE: 'You can\'t delete comment offline',
+};
+
+export const AlertType = {
+  SUCCESS: 'SUCCESS',
+  WARNING: 'WARNING',
+  ERROR: 'ERROR',
 };

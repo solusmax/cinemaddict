@@ -3,7 +3,7 @@ import FilmsListView from '../view/films-list.js';
 import FullFilmCardView from '../view/full-film-card.js';
 import ShowMoreButtonView from '../view/show-more-button.js';
 import SortMenuView from '../view/sort-menu.js';
-import ErrorAlertPresenter from './error-alert.js';
+import AlertPresenter from './alert.js';
 import {
   filter,
   getCurrentDate,
@@ -11,6 +11,7 @@ import {
   getFilmsSortedByDate,
   getFilmsSortedByRating,
   isEscEvent,
+  isOnline,
   removeElement,
   renderElement,
   RenderPosition,
@@ -24,7 +25,8 @@ import {
   MainListTitleText,
   FilmCardStateType,
   ViewStateValue,
-  ErrorMessage
+  AlertMessage,
+  AlertType
 } from '../constants.js';
 
 const BODY_NO_SCROLL_CLASS_NAME = 'hide-overflow';
@@ -501,7 +503,7 @@ export default class FilmsList {
             this._updatingUserMetaFilmsIds.delete(update.id);
             this._updateFilmCards(update.id);
             this._updateFullFilmCardState(null, null, FullFilmCardRenderUpdateType.UPDATE);
-            ErrorAlertPresenter.renderErrorAlert(ErrorMessage.FILM_UPDATING);
+            AlertPresenter.renderAlert(AlertMessage.ERROR_FILM_UPDATING);
           });
         break;
 
@@ -515,9 +517,14 @@ export default class FilmsList {
             this._commentsModel.addComment(updateType, film, comments);
           })
           .catch(() => {
-            this._updateFullFilmCardState(FilmCardStateType.COMMENT_ADDING, ViewStateValue.PROCESSING, FullFilmCardRenderUpdateType.UPDATE);
+            this._updateFullFilmCardState(FilmCardStateType.COMMENT_ADDING, ViewStateValue.NO_PROCESSING, FullFilmCardRenderUpdateType.UPDATE);
             this._fullFilmCardComponent.shakeNewCommentForm();
-            ErrorAlertPresenter.renderErrorAlert(ErrorMessage.COMMENT_ADDING);
+
+            if (isOnline()) {
+              AlertPresenter.renderAlert(AlertMessage.ERROR_COMMENT_ADDING);
+            } else {
+              AlertPresenter.renderAlert(AlertMessage.WARNING_COMMENT_ADDING_OFFLINE, AlertType.WARNING);
+            }
           });
         break;
 
@@ -534,7 +541,12 @@ export default class FilmsList {
             this._fullFilmCardComponent.removeIdFromCommentsToDeleteState(update[1]);
             this._updateFullFilmCardState(null, null, FullFilmCardRenderUpdateType.UPDATE);
             this._fullFilmCardComponent.shakeComment(update[1]);
-            ErrorAlertPresenter.renderErrorAlert(ErrorMessage.COMMENT_DELETING);
+
+            if (isOnline()) {
+              AlertPresenter.renderAlert(AlertMessage.ERROR_COMMENT_DELETING);
+            } else {
+              AlertPresenter.renderAlert(AlertMessage.WARNING_COMMENT_DELETING_OFFLINE, AlertType.WARNING);
+            }
           });
         break;
     }
@@ -672,7 +684,12 @@ export default class FilmsList {
         }
 
         this._updateFullFilmCardState(FilmCardStateType.COMMENTS_LOADING, ViewStateValue.ERROR, FullFilmCardRenderUpdateType.UPDATE);
-        ErrorAlertPresenter.renderErrorAlert(ErrorMessage.COMMENTS_LOADING);
+
+        if (isOnline()) {
+          AlertPresenter.renderAlert(AlertMessage.ERROR_COMMENTS_LOADING);
+        } else {
+          AlertPresenter.renderAlert(AlertMessage.WARNING_COMMENTS_LOADING_OFFLINE, AlertType.WARNING);
+        }
       });
   }
 
