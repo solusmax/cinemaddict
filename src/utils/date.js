@@ -1,12 +1,14 @@
 import dayjs from 'dayjs';
 import dayjsDuration from 'dayjs/plugin/duration';
 import dayjsIsBetween from 'dayjs/plugin/isBetween';
+import dayjsIsSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import dayjsIsToday from 'dayjs/plugin/isToday';
 import dayjsMinMax from 'dayjs/plugin/minMax';
 import dayjsRelativeTime from 'dayjs/plugin/relativeTime';
 
 dayjs.extend(dayjsDuration);
 dayjs.extend(dayjsIsBetween);
+dayjs.extend(dayjsIsSameOrAfter);
 dayjs.extend(dayjsIsToday);
 dayjs.extend(dayjsMinMax);
 dayjs.extend(dayjsRelativeTime);
@@ -21,7 +23,9 @@ export const getMostRecentDate = (...dates) => dayjs.max([...dates.map((date) =>
 
 export const humanizeFilmDate = (date) => dayjs(date).format('D MMMM YYYY');
 
-export const humanizeCommentDate = (date) => dayjs().to(date);
+export const humanizeCommentDate = (date) => dayjs(date).isSameOrAfter(dayjs())
+  ? 'now'
+  : dayjs(date).fromNow();
 
 export const getYearFromDate = (date) => dayjs(date).year();
 
