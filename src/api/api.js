@@ -1,7 +1,7 @@
 import CommentsModel from '../model/comments.js';
 import FilmsModel from '../model/films.js';
 
-const Methods = {
+const Method = {
   GET: 'GET',
   POST: 'POST',
   PUT: 'PUT',
@@ -36,9 +36,9 @@ export default class Api {
   updateFilm(film) {
     return this._load({
       url: `movies/${film.id}`,
-      method: Methods.PUT,
+      method: Method.PUT,
       body: JSON.stringify(FilmsModel.adaptToServer(film)),
-      headers: new Headers({'Content-Type': 'application/json'}),
+      headers: new Headers({ 'Content-Type': 'application/json' }),
     })
       .then(Api.toJSON)
       .then(FilmsModel.adaptToClient);
@@ -47,9 +47,9 @@ export default class Api {
   addComment(film, comment) {
     return this._load({
       url: `comments/${film.id}`,
-      method: Methods.POST,
+      method: Method.POST,
       body: JSON.stringify(CommentsModel.adaptToServer(comment)),
-      headers: new Headers({'Content-Type': 'application/json'}),
+      headers: new Headers({ 'Content-Type': 'application/json' }),
     })
       .then(Api.toJSON)
       .then((response) => ({
@@ -61,23 +61,23 @@ export default class Api {
   deleteComment(commentId) {
     return this._load({
       url: `comments/${commentId}`,
-      method: Methods.DELETE,
+      method: Method.DELETE,
     });
   }
 
   sync(data) {
     return this._load({
       url: 'movies/sync',
-      method: Methods.POST,
+      method: Method.POST,
       body: JSON.stringify(data),
-      headers: new Headers({'Content-Type': 'application/json'}),
+      headers: new Headers({ 'Content-Type': 'application/json' }),
     })
       .then(Api.toJSON);
   }
 
   _load({
     url,
-    method = Methods.GET,
+    method = Method.GET,
     body = null,
     headers = new Headers(),
     signal = null,
@@ -86,16 +86,18 @@ export default class Api {
 
     return fetch(
       `${this._endPoint}/${url}`,
-      {method, body, headers, signal},
+      { method, body, headers, signal },
     )
       .then(Api.checkStatus)
       .catch(Api.catchError);
   }
 
-  cancelCurrentLoadingComments() {
-    if (this._commentsLoadingAbortController) {
-      this._commentsLoadingAbortController.abort();
+  cancelCurrentCommentsLoading() {
+    if (!this._commentsLoadingAbortController) {
+      return;
     }
+
+    this._commentsLoadingAbortController.abort();
   }
 
   static checkStatus(response) {

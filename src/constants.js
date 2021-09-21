@@ -5,19 +5,13 @@ export const EMOJIS = [
   'smile',
 ];
 
-export const SortMethods = {
-  DEFAULT: 'default',
-  DATE: 'date',
-  RATING: 'rating',
-};
-
-export const UserActions = {
+export const UserAction = {
   UPDATE_FILM: 'UPDATE_FILM',
   ADD_COMMENT: 'ADD_COMMENT',
   DELETE_COMMENT: 'DELETE_COMMENT',
 };
 
-export const UpdateTypes = {
+export const UpdateType = {
   INIT: 'INIT',
   FILM: 'FILM',
   FILM_AND_EXTRA: 'FILM_AND_EXTRA',
@@ -25,26 +19,32 @@ export const UpdateTypes = {
   FILMS_LIST_AND_SORT: 'FILMS_LIST_AND_SORT',
 };
 
-export const FilterTypes = {
+export const FilterType = {
   ALL_FILMS: 'all',
   WATCHLIST: 'watchlist',
   HISTORY: 'history',
   FAVORITES: 'favorites',
 };
 
-export const UserRanks = {
+export const SortMethod = {
+  DEFAULT: 'default',
+  DATE: 'date',
+  RATING: 'rating',
+};
+
+export const UserRank = {
   NOVICE: 'Novice',
   FAN: 'Fan',
   MOVIE_BUFF: 'Movie Buff',
 };
 
-export const UserRanksRanges = {
-  [UserRanks.NOVICE]: [1, 10],
-  [UserRanks.FAN]: [11, 20],
-  [UserRanks.MOVIE_BUFF]: [21, Infinity],
+export const UserRankRange = {
+  [UserRank.NOVICE]: [1, 10],
+  [UserRank.FAN]: [11, 20],
+  [UserRank.MOVIE_BUFF]: [21, Infinity],
 };
 
-export const StatsRanges = {
+export const StatisticsRange = {
   ALL_TIME: 'All time',
   TODAY: 'Today',
   WEEK: 'Week',
@@ -52,18 +52,21 @@ export const StatsRanges = {
   YEAR: 'Year',
 };
 
-export const MainListTitleText = {
-  DEFAULT: 'All movies. Upcoming',
-  [FilterTypes.ALL_FILMS]: 'There are no movies in our database',
-  [FilterTypes.WATCHLIST]: 'There are no movies to watch now',
-  [FilterTypes.HISTORY]: 'There are no watched movies now',
-  [FilterTypes.FAVORITES]: 'There are no favorite movies now',
-  LOADING: 'Loading...',
+export const CalendarUnit = {
+  WEEK: 'week',
+  MONTH: 'month',
+  YEAR: 'year',
+};
+
+export const FilmsListType = {
+  MAIN: 'films-list-main',
+  TOP_RATED: 'films-list-top-rated',
+  MOST_COMMENTED: 'films-list-most-commented',
 };
 
 export const FilmCardStateType = {
   COMMENT_ADDING: 'commentAdding',
-  COMMENTS_IDS_TO_DELETE: 'commentsIdsToDelete',
+  COMMENTS_TO_DELETE_IDS: 'commentsToDeleteIds',
   COMMENTS_LOADING: 'commentsLoading',
 };
 
@@ -73,7 +76,13 @@ export const ViewStateValue = {
   ERROR: 'ERROR',
 };
 
-export const AlertMessage = {
+export const NotificationType = {
+  SUCCESS: 'SUCCESS',
+  WARNING: 'WARNING',
+  ERROR: 'ERROR',
+};
+
+export const NotificationMessage = {
   ERROR_COMMENTS_LOADING: 'Error loading comments',
   ERROR_COMMENT_ADDING: 'Error adding comment',
   ERROR_COMMENT_DELETING: 'Error deleting comment',
@@ -86,8 +95,11 @@ export const AlertMessage = {
   WARNING_COMMENT_DELETING_OFFLINE: 'You can\'t delete comment offline',
 };
 
-export const AlertType = {
-  SUCCESS: 'SUCCESS',
-  WARNING: 'WARNING',
-  ERROR: 'ERROR',
+export const MainFilmsListTitleText = {
+  DEFAULT: 'All movies. Upcoming',
+  LOADING: 'Loading...',
+  [FilterType.ALL_FILMS]: 'There are no movies in our database',
+  [FilterType.WATCHLIST]: 'There are no movies to watch now',
+  [FilterType.HISTORY]: 'There are no watched movies now',
+  [FilterType.FAVORITES]: 'There are no favorite movies now',
 };

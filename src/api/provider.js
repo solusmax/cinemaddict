@@ -3,9 +3,12 @@ import { isOnline } from '../utils';
 
 const createStoreStructure = (items) =>
   items
-    .reduce((acc, current) => Object.assign({}, acc, {
-      [current.id]: current,
-    }), {});
+    .reduce((accumulator, currentItem) => Object.assign(
+      {},
+      accumulator,
+      {
+        [currentItem.id]: currentItem,
+      }), {});
 
 export default class Provider {
   constructor(api, store) {
@@ -19,6 +22,7 @@ export default class Provider {
         .then((films) => {
           const items = createStoreStructure(films.map(FilmsModel.adaptToServer));
           this._store.setItems(items);
+
           return films;
         });
     }
@@ -37,10 +41,10 @@ export default class Provider {
       return this._api.updateFilm(film)
         .then((updatedFilm) => {
           this._store.setItem(updatedFilm.id, FilmsModel.adaptToServer(updatedFilm));
+
           return updatedFilm;
         });
     }
-
 
     this._store.setItem(film.id, FilmsModel.adaptToServer(Object.assign({}, film)));
 
@@ -73,7 +77,7 @@ export default class Provider {
     return Promise.reject(new Error('Sync data failed'));
   }
 
-  cancelCurrentLoadingComments() {
-    this._api.cancelCurrentLoadingComments();
+  cancelCurrentCommentsLoading() {
+    this._api.cancelCurrentCommentsLoading();
   }
 }

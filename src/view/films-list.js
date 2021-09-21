@@ -1,54 +1,46 @@
-import {
-  MainListTitleText,
-  FilterTypes
-} from '../constants.js';
-import { createElement } from '../utils';
 import AbstractView from './abstract.js';
+import { createElement } from '../utils';
+import {
+  FilmsListType,
+  FilterType,
+  MainFilmsListTitleText
+} from '../constants.js';
 
-const ListIds = {
-  MAIN: 'films-list-main',
-  TOP_RATED: 'films-list-top-rated',
-  MOST_COMMENTED: 'films-list-most-commented',
-};
-
-const ClassNames = {
+const ClassName = {
   FILMS_LIST: 'films-list',
-  FILMS_LIST_CONTAINER: 'films-list__container',
+  FILMS_LIST_INNER_CONTAINER: 'films-list__container',
   FILMS_LIST_TITLE: 'films-list__title',
   VISUALLY_HIDDEN: 'visually-hidden',
 };
 
-const createMainListInnerTemplate = () => (
-  `<h2 class="${ClassNames.FILMS_LIST_TITLE} ${ClassNames.VISUALLY_HIDDEN}">${MainListTitleText.DEFAULT}</h2>
+const createMainListInnerTemplate = (isEmpty) => (
+  `<h2 class="${ClassName.FILMS_LIST_TITLE} ${isEmpty ? '' : ClassName.VISUALLY_HIDDEN}">${isEmpty ? MainFilmsListTitleText[FilterType.ALL_FILMS] : MainFilmsListTitleText.DEFAULT}</h2>
 
-  <div class="${ClassNames.FILMS_LIST_CONTAINER}">
-  </div>`
+  ${isEmpty ? '' : `<div class="${ClassName.FILMS_LIST_INNER_CONTAINER}"></div>`}`
 );
 
-const createEmptyMainListInnerTemplate = () => `<h2 class="${ClassNames.FILMS_LIST_TITLE}">${MainListTitleText[FilterTypes.ALL_FILMS]}</h2>`;
-
 const createTopRatedListTemplate = () => (
-  `<section class="${ClassNames.FILMS_LIST} films-list--extra" id="${ListIds.TOP_RATED}">
-    <h2 class="${ClassNames.FILMS_LIST_TITLE}">Top rated</h2>
+  `<section class="${ClassName.FILMS_LIST} films-list--extra" id="${FilmsListType.TOP_RATED}">
+    <h2 class="${ClassName.FILMS_LIST_TITLE}">Top rated</h2>
 
-    <div class="${ClassNames.FILMS_LIST_CONTAINER}">
+    <div class="${ClassName.FILMS_LIST_INNER_CONTAINER}">
     </div>
   </section>`
 );
 
 const createMostCommentedListTemplate = () => (
-  `<section class="${ClassNames.FILMS_LIST} films-list--extra" id="${ListIds.MOST_COMMENTED}">
-    <h2 class="${ClassNames.FILMS_LIST_TITLE}">Most commented</h2>
+  `<section class="${ClassName.FILMS_LIST} films-list--extra" id="${FilmsListType.MOST_COMMENTED}">
+    <h2 class="${ClassName.FILMS_LIST_TITLE}">Most commented</h2>
 
-    <div class="${ClassNames.FILMS_LIST_CONTAINER}">
+    <div class="${ClassName.FILMS_LIST_INNER_CONTAINER}">
     </div>
   </section>`
 );
 
 const createFilmsListTemplate = (isEmpty) => (
   `<section class="films">
-    <section class="${ClassNames.FILMS_LIST}" id="${ListIds.MAIN}">
-      ${isEmpty ? createEmptyMainListInnerTemplate() : createMainListInnerTemplate()}
+    <section class="${ClassName.FILMS_LIST}" id="${FilmsListType.MAIN}">
+      ${createMainListInnerTemplate(isEmpty)}
     </section>
   </section>`
 );
@@ -75,87 +67,98 @@ export default class FilmsList extends AbstractView {
     return createMostCommentedListTemplate();
   }
 
-  isTopRatedListElementRendered() {
-    return Boolean(document.querySelector(`#${ListIds.TOP_RATED}`));
+  isExtraListRendered(listType) {
+    let selector;
+
+    switch (listType) {
+      case FilmsListType.TOP_RATED:
+        selector = `#${FilmsListType.TOP_RATED}`;
+        break;
+      case FilmsListType.MOST_COMMENTED:
+        selector = `#${FilmsListType.MOST_COMMENTED}`;
+        break;
+    }
+
+    return Boolean(document.querySelector(selector));
   }
 
-  isMostCommentedListElementRendered() {
-    return Boolean(document.querySelector(`#${ListIds.MOST_COMMENTED}`));
-  }
-
-  getMainListContainerId() {
-    return ListIds.MAIN;
-  }
-
-  setMainListTitleText(text) {
+  setMainFilmsListTitleText(text) {
     this._getMainListTitleElement().innerText = text;
   }
 
-  showMainListTitleText() {
+  showMainFilmsListTitleText() {
     const mainListTitleElement = this._getMainListTitleElement();
 
-    if (mainListTitleElement.classList.contains(ClassNames.VISUALLY_HIDDEN)) {
-      mainListTitleElement.classList.remove(ClassNames.VISUALLY_HIDDEN);
+    if (mainListTitleElement.classList.contains(ClassName.VISUALLY_HIDDEN)) {
+      mainListTitleElement.classList.remove(ClassName.VISUALLY_HIDDEN);
     }
   }
 
-  hideMainListTitleText() {
+  hideMainFilmsListTitleText() {
     const mainListTitleElement = this._getMainListTitleElement();
 
-    if (!mainListTitleElement.classList.contains(ClassNames.VISUALLY_HIDDEN)) {
-      mainListTitleElement.classList.add(ClassNames.VISUALLY_HIDDEN);
+    if (!mainListTitleElement.classList.contains(ClassName.VISUALLY_HIDDEN)) {
+      mainListTitleElement.classList.add(ClassName.VISUALLY_HIDDEN);
     }
   }
 
-  isMainListTitleTextShown() {
-    return !this._getMainListTitleElement().classList.contains(ClassNames.VISUALLY_HIDDEN);
+  isMainFilmsListTitleTextShown() {
+    return !this._getMainListTitleElement().classList.contains(ClassName.VISUALLY_HIDDEN);
   }
 
   // Геттеры элементов ↓↓↓
 
   getMainListElement() {
-    return this.getElement().querySelector(`#${ListIds.MAIN}`);
+    return this.getElement().querySelector(`#${FilmsListType.MAIN}`);
   }
 
   _getMainListTitleElement() {
-    return this.getMainListElement().querySelector(`.${ClassNames.FILMS_LIST_TITLE}`);
+    return this.getMainListElement().querySelector(`.${ClassName.FILMS_LIST_TITLE}`);
   }
 
-  getMainListContainerElement() {
-    return this.getMainListElement().querySelector(`.${ClassNames.FILMS_LIST_CONTAINER}`);
+  getMainListInnerContainerElement() {
+    return this.getMainListElement().querySelector(`.${ClassName.FILMS_LIST_INNER_CONTAINER}`);
   }
 
-  getTopRatedListElement() {
-    if (!this._topRatedListElement) {
-      this._topRatedListElement = createElement(this._getTopRatedListTemplate());
+  getExtraListElement(listType) {
+    switch (listType) {
+      case FilmsListType.TOP_RATED:
+        if (!this._topRatedListElement) {
+          this._topRatedListElement = createElement(this._getTopRatedListTemplate());
+        }
+
+        return this._topRatedListElement;
+
+      case FilmsListType.MOST_COMMENTED:
+        if (!this._mostCommentedListElement) {
+          this._mostCommentedListElement = createElement(this._getMostCommentedListTemplate());
+        }
+
+        return this._mostCommentedListElement;
     }
-
-    return this._topRatedListElement;
   }
 
-  getMostCommentedListElement() {
-    if (!this._mostCommentedListElement) {
-      this._mostCommentedListElement = createElement(this._getMostCommentedListTemplate());
-    }
-
-    return this._mostCommentedListElement;
-  }
-
-  getTopRatedListContainerElement() {
-    return this.getTopRatedListElement().querySelector(`.${ClassNames.FILMS_LIST_CONTAINER}`);
-  }
-
-  getMostCommentedListContainerElement() {
-    return this.getMostCommentedListElement().querySelector(`.${ClassNames.FILMS_LIST_CONTAINER}`);
+  getExtraListInnerContainerElement(listType) {
+    return this.getExtraListElement(listType).querySelector(`.${ClassName.FILMS_LIST_INNER_CONTAINER}`);
   }
 
   // Ремуверы элементов ↓↓↓
 
-  removeTopRatedListElement() {
-    this._topRatedListElement = null;
-  }
+  removeExtraListElement(listType) {
+    if (!this.isExtraListRendered(listType)) {
+      return;
+    }
 
-  removeMostCommentedListElement() {
-    this._mostCommentedListElement = null;
+    switch (listType) {
+      case FilmsListType.TOP_RATED:
+        this._topRatedListElement.remove();
+        this._topRatedListElement = null;
+        break;
+
+      case FilmsListType.MOST_COMMENTED:
+        this._mostCommentedListElement.remove();
+        this._mostCommentedListElement = null;
+        break;
+    }
   }
 }

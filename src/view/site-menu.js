@@ -1,12 +1,12 @@
 import AbstractView from './abstract.js';
 
-const STATS_MENU_LINK_ID = 'stats-link';
+const STATISTICS_MENU_LINK_ID = 'statistics-link';
 
 const ADDITIONAL_CONTROL_ACTIVE_STATE_CLASS_NAME = 'main-navigation__additional--active';
 
 const createSiteMenuTemplate = () => (
   `<nav class="main-navigation">
-    <a href="#stats" id="${STATS_MENU_LINK_ID}" class="main-navigation__additional">Stats</a>
+    <a href="#stats" id="${STATISTICS_MENU_LINK_ID}" class="main-navigation__additional">Stats</a>
   </nav>`
 );
 
@@ -14,15 +14,15 @@ export default class SiteMenu extends AbstractView {
   constructor() {
     super();
 
-    this._onStatsMenuLinkClick = this._onStatsMenuLinkClick.bind(this);
+    this._onStatisticsMenuLinkClick = this._onStatisticsMenuLinkClick.bind(this);
   }
 
   _getTemplate() {
     return createSiteMenuTemplate();
   }
 
-  _getStatsMenuLinkElement() {
-    return this.getElement().querySelector(`#${STATS_MENU_LINK_ID}`);
+  _getStatisticsMenuLinkElement() {
+    return this.getElement().querySelector(`#${STATISTICS_MENU_LINK_ID}`);
   }
 
   saveWindowScrollPosition() {
@@ -30,21 +30,21 @@ export default class SiteMenu extends AbstractView {
   }
 
   restoreWindowScrollPosition() {
-    window.scrollTo({top: this._windowScrollPosition});
+    window.scrollTo({ top: this._windowScrollPosition });
   }
 
-  toggleStatsMenuLinkActiveState() {
-    this._getStatsMenuLinkElement().classList.toggle(ADDITIONAL_CONTROL_ACTIVE_STATE_CLASS_NAME);
+  toggleStatisticsMenuLinkActiveState() {
+    this._getStatisticsMenuLinkElement().classList.toggle(ADDITIONAL_CONTROL_ACTIVE_STATE_CLASS_NAME);
   }
 
-  _onStatsMenuLinkClick(evt) {
+  setStatisticsMenuLinkClickListener(cb) {
+    this._callback.statisticsMenuLinkClick = cb;
+    this._getStatisticsMenuLinkElement().addEventListener('click', this._onStatisticsMenuLinkClick);
+  }
+
+  _onStatisticsMenuLinkClick(evt) {
     evt.preventDefault();
 
-    this._callback.statsMenuLinkClick();
-  }
-
-  setStatsMenuLinkClickListener(cb) {
-    this._callback.statsMenuLinkClick = cb;
-    this._getStatsMenuLinkElement().addEventListener('click', this._onStatsMenuLinkClick);
+    this._callback.statisticsMenuLinkClick();
   }
 }

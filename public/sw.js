@@ -1,6 +1,6 @@
-const CACHE_PREFIX = 'cinemaaddict-1483111-cache';
-const CACHE_VER = 'v15';
-const CACHE_NAME = `${CACHE_PREFIX}-${CACHE_VER}`;
+const CACHE_PREFIX = 'cinemaddict-1483111-cache';
+const CACHE_VERSION = 'v15';
+const CACHE_NAME = `${CACHE_PREFIX}-${CACHE_VERSION}`;
 
 const HTTP_STATUS_OK = 200;
 const RESPONSE_SAFE_TYPE = 'basic';
@@ -59,8 +59,8 @@ self.addEventListener('activate', (evt) => {
   );
 });
 
-const handleFetch = (evt) => {
-  const {request} = evt;
+self.addEventListener('fetch', (evt) => {
+  const { request } = evt;
 
   evt.respondWith(
     caches.match(request)
@@ -84,6 +84,4 @@ const handleFetch = (evt) => {
           });
       }),
   );
-};
-
-self.addEventListener('fetch', handleFetch);
+});

@@ -1111,11 +1111,10 @@ button {
   background-color: var(--text-color-active);
 }
 .statistic__text-list {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  justify-content: space-around;
   list-style: none;
   margin-bottom: 100px;
-  word-break: break-word;
 }
 .statistic__text-item {
   display: flex;
@@ -1149,7 +1148,7 @@ button {
   padding-top: 50px;
   padding-bottom: 50px;
 }
-.alert {
+.notification {
   position: fixed;
   left: 0;
   right: 0;
@@ -1157,7 +1156,7 @@ button {
   z-index: 10000;
   padding: 10px;
 }
-.alert__title {
+.notification__title {
   margin: 0;
   padding: 0;
   font-weight: normal;
