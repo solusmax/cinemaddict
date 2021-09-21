@@ -39,26 +39,6 @@ export default class AbstractFilmCard extends SmartAbstractView {
     throw new Error('AbstractFilmCard method not implemented: _getMarkAsFavoriteButtonElement');
   }
 
-  // Колбэки листенеров ↓↓↓
-
-  _onAddToWatchlistButtonClick(evt) {
-    evt.preventDefault();
-
-    this._callback.addToWatchlistButtonClick();
-  }
-
-  _onMarkAsWatchedButtonClick(evt) {
-    evt.preventDefault();
-
-    this._callback.markAsWatchedButtonClick();
-  }
-
-  _onMarkAsFavoriteButtonClick(evt) {
-    evt.preventDefault();
-
-    this._callback.markAsFavoriteButtonClick();
-  }
-
   // Сеттеры листенеров ↓↓↓
 
   setAddToWatchlistButtonClickListener(cb) {
@@ -88,5 +68,25 @@ export default class AbstractFilmCard extends SmartAbstractView {
 
   removeMarkAsFavoriteButtonClickListener() {
     this._getMarkAsFavoriteButtonElement().removeEventListener('click', this._onMarkAsFavoriteButtonClick);
+  }
+
+  // Колбэки листенеров ↓↓↓
+
+  _onAddToWatchlistButtonClick(evt) {
+    evt.preventDefault();
+
+    this._callback.addToWatchlistButtonClick();
+  }
+
+  _onMarkAsWatchedButtonClick(evt) {
+    evt.preventDefault();
+
+    this._callback.markAsWatchedButtonClick();
+  }
+
+  _onMarkAsFavoriteButtonClick(evt) {
+    evt.preventDefault();
+
+    this._callback.markAsFavoriteButtonClick();
   }
 }

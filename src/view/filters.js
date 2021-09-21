@@ -1,15 +1,15 @@
 import AbstractView from './abstract.js';
-import { setActiveClass } from '../utils';
-import { FilterTypes } from '../constants.js';
+import { getActivityClass } from '../utils';
+import { FilterType } from '../constants.js';
 
 const CONTROL_ACTIVE_STATE_CLASS_NAME = 'main-navigation__item--active';
 
 const createFilterTemplate = ({ type: filterType, title: filterTitle, count: filteredFilmsCount }, currentFilterType) => {
-  const isAllFilmsFilter = filterType === FilterTypes.ALL_FILMS;
+  const isAllFilmsFilter = filterType === FilterType.ALL_FILMS;
   const isCurrentFilter = filterType === currentFilterType;
 
   return (
-    `<a href="#${filterType}" class="main-navigation__item ${setActiveClass(isCurrentFilter, CONTROL_ACTIVE_STATE_CLASS_NAME)}" data-filter-type="${filterType}">${filterTitle} ${!isAllFilmsFilter ? `<span class="main-navigation__item-count">${filteredFilmsCount}</span>` : ''}</a>`
+    `<a href="#${filterType}" class="main-navigation__item ${getActivityClass(isCurrentFilter, CONTROL_ACTIVE_STATE_CLASS_NAME)}" data-filter-type="${filterType}">${filterTitle} ${!isAllFilmsFilter ? `<span class="main-navigation__item-count">${filteredFilmsCount}</span>` : ''}</a>`
   );
 };
 
@@ -33,6 +33,11 @@ export default class Filters extends AbstractView {
     return createFiltersTemplate(this._filters, this._currentFilterType);
   }
 
+  setFiltersClickListener(cb) {
+    this._callback.filterButtonClick = cb;
+    this.getElement().addEventListener('click', this._onFiltersClick);
+  }
+
   _onFiltersClick(evt) {
     if (!(evt.target.tagName === 'A' || evt.target.parentElement.tagName === 'A')) {
       return;
@@ -43,10 +48,5 @@ export default class Filters extends AbstractView {
     const currentElement = evt.target.tagName === 'A' ? evt.target : evt.target.parentElement;
 
     this._callback.filterButtonClick(currentElement.dataset.filterType);
-  }
-
-  setFiltersClickListener(cb) {
-    this._callback.filterButtonClick = cb;
-    this.getElement().addEventListener('click', this._onFiltersClick);
   }
 }

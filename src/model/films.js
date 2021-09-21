@@ -1,7 +1,9 @@
 import AbstractObserver from '../utils/abstract-observer.js';
 import {
-  findIndexById,
-  getArrayWithoutElement
+  getArrayWithoutElement,
+  getFilmCommentsCount,
+  getFilmRating,
+  getIndexById
 } from '../utils';
 
 export default class Films extends AbstractObserver {
@@ -22,7 +24,7 @@ export default class Films extends AbstractObserver {
   }
 
   updateFilm(updateType, updatedFilm) {
-    const filmIndex = findIndexById(this._films, updatedFilm.id);
+    const filmIndex = getIndexById(this._films, updatedFilm.id);
 
     if (filmIndex === -1) {
       throw new Error('Can\'t update unexisting film');
@@ -38,7 +40,7 @@ export default class Films extends AbstractObserver {
   }
 
   addComment(updateType, filmToUpdate, updatedComments) {
-    const filmIndex = findIndexById(this._films, filmToUpdate.id);
+    const filmIndex = getIndexById(this._films, filmToUpdate.id);
 
     if (filmIndex === -1) {
       throw new Error('Can\'t update unexisting film');
@@ -51,14 +53,14 @@ export default class Films extends AbstractObserver {
     this._notify(updateType, filmToUpdate);
   }
 
-  deleteComment(updateType, filmToUpdate, commentIdToDelete) {
-    const filmIndex = findIndexById(this._films, filmToUpdate.id);
+  deleteComment(updateType, filmToUpdate, commentToDeleteId) {
+    const filmIndex = getIndexById(this._films, filmToUpdate.id);
 
     if (filmIndex === -1) {
       throw new Error('Can\'t update unexisting film');
     }
 
-    const commentIndex = findIndexById(this._films[filmIndex].comments, commentIdToDelete, true);
+    const commentIndex = getIndexById(this._films[filmIndex].comments, commentToDeleteId, true);
 
     if (commentIndex === -1) {
       throw new Error('Can\'t delete unexisting comment');
@@ -70,64 +72,64 @@ export default class Films extends AbstractObserver {
   }
 
   hasComments() {
-    return Boolean(this._films.reduce((commentCount, film) => commentCount + film.comments.length, 0));
+    return Boolean(this._films.reduce((commentCount, film) => commentCount + getFilmCommentsCount(film), 0));
   }
 
   hasNonZeroRating() {
-    return Boolean(this._films.filter((film) => Boolean(Number(film.info.rating))).length > 0);
+    return Boolean(this._films.filter((film) => getFilmRating(film)).length > 0);
   }
 
   static adaptToClient(film) {
-    const filmInfo = Object.assign({},film['film_info']);
-    const userDetails = Object.assign({},film['user_details']);
+    const info = Object.assign({}, film['film_info']);
+    const userMeta = Object.assign({}, film['user_details']);
 
-    const adaptedFilmInfo = Object.assign(
+    const adaptedInfo = Object.assign(
       {},
-      filmInfo,
+      info,
       {
-        ageRating: filmInfo['age_rating'],
-        duration: filmInfo['runtime'],
-        genres: filmInfo['genre'],
-        originalTitle: filmInfo['alternative_title'],
-        rating: filmInfo['total_rating'],
-        releaseCountry: filmInfo['release']['release_country'],
-        releaseDate: filmInfo['release']['date'],
-        screenwriters: filmInfo['writers'],
+        ageRating: info['age_rating'],
+        duration: info['runtime'],
+        genres: info['genre'],
+        originalTitle: info['alternative_title'],
+        rating: info['total_rating'],
+        releaseCountry: info['release']['release_country'],
+        releaseDate: info['release']['date'],
+        screenwriters: info['writers'],
       },
     );
 
-    delete adaptedFilmInfo['age_rating'];
-    delete adaptedFilmInfo['alternative_title'];
-    delete adaptedFilmInfo['genre'];
-    delete adaptedFilmInfo['release'];
-    delete adaptedFilmInfo['runtime'];
-    delete adaptedFilmInfo['total_rating'];
-    delete adaptedFilmInfo['writers'];
+    delete adaptedInfo['age_rating'];
+    delete adaptedInfo['alternative_title'];
+    delete adaptedInfo['genre'];
+    delete adaptedInfo['release'];
+    delete adaptedInfo['runtime'];
+    delete adaptedInfo['total_rating'];
+    delete adaptedInfo['writers'];
 
-    const adaptedUserDetials = Object.assign(
+    const adaptedUserMeta = Object.assign(
       {},
-      userDetails,
+      userMeta,
       {
-        isFavorite: userDetails['favorite'],
-        isOnWatchlis: userDetails['watchlist'],
-        isWatched: userDetails['already_watched'],
-        watchingDate: userDetails['watching_date'],
+        isFavorite: userMeta['favorite'],
+        isOnWatchlis: userMeta['watchlist'],
+        isWatched: userMeta['already_watched'],
+        watchingDate: userMeta['watching_date'],
       },
     );
 
-    delete adaptedUserDetials['already_watched'];
-    delete adaptedUserDetials['favorite'];
-    delete adaptedUserDetials['watching_date'];
-    delete adaptedUserDetials['watchlist'];
+    delete adaptedUserMeta['already_watched'];
+    delete adaptedUserMeta['favorite'];
+    delete adaptedUserMeta['watching_date'];
+    delete adaptedUserMeta['watchlist'];
 
     const adaptedFilm = Object.assign(
       {},
       film,
       {
         id: Number(film['id']),
-        info: adaptedFilmInfo,
-        userMeta: adaptedUserDetials,
-        comments: film['comments'].slice().map((commentId) => Number(commentId)),
+        info: adaptedInfo,
+        userMeta: adaptedUserMeta,
+        comments: film['comments'].map((commentId) => Number(commentId)),
       },
     );
 
@@ -138,8 +140,8 @@ export default class Films extends AbstractObserver {
   }
 
   static adaptToServer(film) {
-    const info = Object.assign({},film.info);
-    const userMeta = Object.assign({},film.userMeta);
+    const info = Object.assign({}, film.info);
+    const userMeta = Object.assign({}, film.userMeta);
 
     const adaptedInfo = Object.assign(
       {},
@@ -190,7 +192,7 @@ export default class Films extends AbstractObserver {
         'id': String(film.id),
         'film_info': adaptedInfo,
         'user_details': adaptedUserMeta,
-        'comments': film.comments.slice().map((commentId) => String(commentId)),
+        'comments': film.comments.map((commentId) => String(commentId)),
       },
     );
 

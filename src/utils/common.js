@@ -1,9 +1,9 @@
-export const getArrayWithoutElement = (array, indexToRemove) => [...array.slice(0, indexToRemove), ...array.slice(indexToRemove + 1)];
+export const getArrayWithoutElement = (array, index) => [...array.slice(0, index), ...array.slice(index + 1)];
 
-export const findIndexById = (array, id, isNotProperty) => array.findIndex((el) => (isNotProperty ? el : el.id) === id);
+export const getIndexById = (array, id, isIdDirectly) => array.findIndex((el) => (isIdDirectly ? el : el.id) === id);
 
-export const addPluralEnding = (count) => count !== 1 ? 's' : '';
+export const getPluralEnding = (count) => count !== 1 ? 's' : '';
 
-export const setActiveClass = (activityCondition, className) => activityCondition ? className : '';
+export const getActivityClass = (isActive, className) => isActive ? className : '';
 
 export const isOnline = () => window.navigator.onLine;

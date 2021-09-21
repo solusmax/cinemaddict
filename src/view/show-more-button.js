@@ -19,12 +19,6 @@ export default class ShowMoreButton extends AbstractView {
     return Boolean(document.querySelector(`.${SHOW_MORE_BUTTON_CLASS_NAME}`));
   }
 
-  _onClick(evt) {
-    evt.preventDefault();
-
-    this._callback.click();
-  }
-
   setClickListener(cb) {
     this._callback.click = cb;
     this.getElement().addEventListener('click', this._onClick);
@@ -32,5 +26,11 @@ export default class ShowMoreButton extends AbstractView {
 
   removeClickListener() {
     this.getElement().removeEventListener('click', this._onClick);
+  }
+
+  _onClick(evt) {
+    evt.preventDefault();
+
+    this._callback.click();
   }
 }

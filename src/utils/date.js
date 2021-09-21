@@ -16,14 +16,14 @@ dayjs.extend(dayjsRelativeTime);
 export const getFormattedDuration = (durationInMinutes) => {
   const duration = dayjs.duration(durationInMinutes, 'minutes');
 
-  return `${duration.hours() ? `${duration.hours()  }h ` : ''}${duration.minutes()}m`;
+  return `${duration.hours() ? `${duration.hours()}h ` : ''}${duration.minutes()}m`;
 };
 
 export const getMostRecentDate = (...dates) => dayjs.max([...dates.map((date) => dayjs(date))]).toISOString();
 
-export const humanizeFilmDate = (date) => dayjs(date).format('D MMMM YYYY');
+export const getHumanizedFilmDate = (date) => dayjs(date).format('D MMMM YYYY');
 
-export const humanizeCommentDate = (date) => dayjs(date).isSameOrAfter(dayjs())
+export const getHumanizedCommentDate = (date) => dayjs(date).isSameOrAfter(dayjs())
   ? 'now'
   : dayjs(date).fromNow();
 
@@ -33,8 +33,4 @@ export const getCurrentDate = () => dayjs().toISOString();
 
 export const isDateToday = (date) => dayjs(date).isToday();
 
-export const isDateBetweenNowAndWeekAgo = (date) => dayjs(date).isBetween(dayjs(), dayjs().subtract(1, 'week'), null, '[]');
-
-export const isDateBetweenNowAndMonthAgo = (date) => dayjs(date).isBetween(dayjs(), dayjs().subtract(1, 'month'), null, '[]');
-
-export const isDateBetweenNowAndYearAgo = (date) => dayjs(date).isBetween(dayjs(), dayjs().subtract(1, 'year'), null, '[]');
+export const isDateBetweenNowAndNAgo = (date, calendarUnit) => dayjs(date).isBetween(dayjs(), dayjs().subtract(1, calendarUnit), null, '[]');

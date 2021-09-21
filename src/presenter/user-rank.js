@@ -1,22 +1,22 @@
 import UserRankView from '../view/user-rank.js';
 import {
-  FilterTypes
-} from '../constants.js';
-import {
   filter,
   getUserRank,
+  removeElement,
   renderElement,
-  replaceElement,
-  removeElement
+  replaceElement
 } from '../utils';
+import {
+  FilterType
+} from '../constants.js';
 
 export default class UserRank {
-  constructor(userRankContainer, filmsModel) {
-    this._userRankContainer = userRankContainer;
+  constructor(containerElement, filmsModel) {
+    this._containerElement = containerElement;
 
     this._filmsModel = filmsModel;
 
-    this._userRankComponent = null;
+    this._component = null;
 
     this._handleModelEvent = this._handleModelEvent.bind(this);
 
@@ -24,31 +24,30 @@ export default class UserRank {
   }
 
   init() {
-    const films = this._getFilms();
-    const watchedFilmsCount = this._getWatchedFilmsCountFilms(films);
+    const watchedFilmsCount = this._getWatchedFilmsCountFilms(this._getFilms());
 
-    const previousUserRankComponent = this._userRankComponent;
+    const previousComponent = this._component;
 
-    if (watchedFilmsCount === 0) {
-      if (previousUserRankComponent) {
-        removeElement(previousUserRankComponent);
+    if (!watchedFilmsCount) {
+      if (previousComponent) {
+        removeElement(previousComponent);
       }
 
-      this._userRankComponent = null;
+      this._component = null;
       return;
     }
 
     const userRank = getUserRank(watchedFilmsCount);
 
-    this._userRankComponent = new UserRankView(userRank);
+    this._component = new UserRankView(userRank);
 
-    if (previousUserRankComponent === null) {
-      renderElement(this._userRankContainer, this._userRankComponent);
+    if (!previousComponent) {
+      renderElement(this._containerElement, this._component);
       return;
     }
 
-    replaceElement(this._userRankComponent, previousUserRankComponent);
-    removeElement(previousUserRankComponent);
+    replaceElement(this._component, previousComponent);
+    removeElement(previousComponent);
   }
 
   _getFilms() {
@@ -56,10 +55,8 @@ export default class UserRank {
   }
 
   _getWatchedFilmsCountFilms(films) {
-    return filter[FilterTypes.HISTORY](films).length;
+    return filter[FilterType.HISTORY](films).length;
   }
-
-  // Хэндлеры и колбэки ↓↓↓
 
   _handleModelEvent() {
     this.init();

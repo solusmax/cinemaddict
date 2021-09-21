@@ -1,26 +1,26 @@
 import FiltersView from '../view/filters.js';
 import {
-  FilterTypes,
-  UpdateTypes
-} from '../constants.js';
-import {
   filter,
   removeElement,
   renderElement,
   RenderPosition,
   replaceElement
 } from '../utils';
+import {
+  FilterType,
+  UpdateType
+} from '../constants.js';
 
 export default class Filters {
-  constructor(filtersContainer, filtersModel, filmsModel, filmsListPresenter, siteMenuComponent) {
-    this._filtersContainer = filtersContainer;
+  constructor(containerElement, filtersModel, filmsModel, filmsListPresenter, siteMenuComponent) {
+    this._containerElement = containerElement;
 
     this._filtersModel = filtersModel;
     this._filmsModel = filmsModel;
 
-    this._filtersComponent = null;
+    this._component = null;
     this._siteMenuComponent = siteMenuComponent;
-    this._statsComponent = null;
+    this._statisticsComponent = null;
 
     this._filmsListPresenter = filmsListPresenter;
 
@@ -31,21 +31,25 @@ export default class Filters {
     this._filtersModel.addObserver(this._handleModelEvent);
   }
 
+  setStatisticsComponent(statisticsComponent) {
+    this._statisticsComponent = statisticsComponent;
+  }
+
   init() {
     const filters = this._getFilters();
 
-    const previousFiltersComponent = this._filtersComponent;
+    const previousComponent = this._component;
 
-    this._filtersComponent = new FiltersView(filters, this._filtersModel.getCurrentFilter());
-    this._filtersComponent.setFiltersClickListener(this._handleFiltersClick);
+    this._component = new FiltersView(filters, this._filtersModel.getCurrentFilter());
+    this._component.setFiltersClickListener(this._handleFiltersClick);
 
-    if (previousFiltersComponent === null) {
-      renderElement(this._filtersContainer, this._filtersComponent, RenderPosition.AFTERBEGIN);
+    if (!previousComponent) {
+      renderElement(this._containerElement, this._component, RenderPosition.AFTERBEGIN);
       return;
     }
 
-    replaceElement(this._filtersComponent, previousFiltersComponent);
-    removeElement(previousFiltersComponent);
+    replaceElement(this._component, previousComponent);
+    removeElement(previousComponent);
   }
 
   _getFilters() {
@@ -53,33 +57,27 @@ export default class Filters {
 
     return [
       {
-        type: FilterTypes.ALL_FILMS,
+        type: FilterType.ALL_FILMS,
         title: 'All movies',
-        count: filter[FilterTypes.ALL_FILMS](films).length,
+        count: filter[FilterType.ALL_FILMS](films).length,
       },
       {
-        type: FilterTypes.WATCHLIST,
+        type: FilterType.WATCHLIST,
         title: 'Watchlist',
-        count: filter[FilterTypes.WATCHLIST](films).length,
+        count: filter[FilterType.WATCHLIST](films).length,
       },
       {
-        type: FilterTypes.HISTORY,
+        type: FilterType.HISTORY,
         title: 'History',
-        count: filter[FilterTypes.HISTORY](films).length,
+        count: filter[FilterType.HISTORY](films).length,
       },
       {
-        type: FilterTypes.FAVORITES,
+        type: FilterType.FAVORITES,
         title: 'Favorites',
-        count: filter[FilterTypes.FAVORITES](films).length,
+        count: filter[FilterType.FAVORITES](films).length,
       },
     ];
   }
-
-  setStatsComponent(statsComponent) {
-    this._statsComponent = statsComponent;
-  }
-
-  // Хэндлеры и колбэки ↓↓↓
 
   _handleModelEvent() {
     this.init();
@@ -93,8 +91,8 @@ export default class Filters {
     }
 
     if (!previousFilterType) {
-      this._siteMenuComponent.toggleStatsMenuLinkActiveState();
-      removeElement(this._statsComponent);
+      this._siteMenuComponent.toggleStatisticsMenuLinkActiveState();
+      removeElement(this._statisticsComponent);
 
       this._filtersModel.setCurrentFilter(null, newFilterType);
       this._filmsListPresenter.init();
@@ -102,6 +100,6 @@ export default class Filters {
       return;
     }
 
-    this._filtersModel.setCurrentFilter(UpdateTypes.FILMS_LIST_AND_SORT, newFilterType);
+    this._filtersModel.setCurrentFilter(UpdateType.FILMS_LIST_AND_SORT, newFilterType);
   }
 }

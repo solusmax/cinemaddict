@@ -1,7 +1,7 @@
 import AbstractObserver from '../utils/abstract-observer.js';
 import {
-  findIndexById,
-  getArrayWithoutElement
+  getArrayWithoutElement,
+  getIndexById
 } from '../utils';
 
 export default class Comments extends AbstractObserver {
@@ -26,9 +26,9 @@ export default class Comments extends AbstractObserver {
     this._filmsModel.addComment(updateType, filmToUpdate, updatedComments);
   }
 
-  deleteComment(updateType, whetherUpdateCommentsModel, filmToUpdate, commentIdToDelete) {
+  deleteComment(updateType, whetherUpdateCommentsModel, filmToUpdate, commentToDeleteId) {
     if (whetherUpdateCommentsModel) {
-      const commentIndex = findIndexById(this._comments, commentIdToDelete);
+      const commentIndex = getIndexById(this._comments, commentToDeleteId);
 
       if (commentIndex === -1) {
         throw new Error('Can\'t delete unexisting comment');
@@ -37,7 +37,7 @@ export default class Comments extends AbstractObserver {
       this._comments = getArrayWithoutElement(this._comments, commentIndex);
     }
 
-    this._filmsModel.deleteComment(updateType, filmToUpdate, commentIdToDelete);
+    this._filmsModel.deleteComment(updateType, filmToUpdate, commentToDeleteId);
   }
 
   static adaptToClient(comment) {

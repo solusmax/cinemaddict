@@ -1,17 +1,21 @@
 import AbstractView from './abstract.js';
-import { setActiveClass } from '../utils';
-import { SortMethods } from '../constants.js';
+import { getActivityClass } from '../utils';
+import { SortMethod } from '../constants.js';
 
-const BUTTON_ACTIVE_STATE_CLASS_NAME = 'sort__button--active';
-const DEFAULT_SORT_METHOD_NAME = 'default';
+const ClassName = {
+  MAIN: 'sort',
+  BUTTON_ACTIVE_STATE: 'sort__button--active',
+};
 
-const SORT_CLASS_NAME = 'sort';
+const createSortMethodTemplate = (sortMethodName) => {
+  const isDefaultSortMethod = sortMethodName === SortMethod.DEFAULT;
 
-const createSortMethodTemplate = (sortMethodName) => `<li><a href="#" class="sort__button ${setActiveClass(sortMethodName === DEFAULT_SORT_METHOD_NAME, BUTTON_ACTIVE_STATE_CLASS_NAME)}" data-sort-method="${sortMethodName}">Sort by ${sortMethodName}</a></li>`;
+  return  `<li><a href="#" class="sort__button ${getActivityClass(isDefaultSortMethod, ClassName.BUTTON_ACTIVE_STATE)}" data-sort-method="${sortMethodName}">Sort by ${sortMethodName}</a></li>`;
+};
 
 const createSortMenuTemplate = () => (
-  `<ul class="${SORT_CLASS_NAME}">
-    ${Object.values(SortMethods).map((sortMethodName) => createSortMethodTemplate(sortMethodName)).join(' ')}
+  `<ul class="${ClassName.MAIN}">
+    ${Object.values(SortMethod).map((sortMethodName) => createSortMethodTemplate(sortMethodName)).join(' ')}
   </ul>`
 );
 
@@ -27,29 +31,20 @@ export default class SortMenu extends AbstractView {
   }
 
   isElementRendered() {
-    return Boolean(document.querySelector(`.${SORT_CLASS_NAME}`));
+    return Boolean(document.querySelector(`.${ClassName.MAIN}`));
+  }
+
+  _getActiveSortMethodElement() {
+    return this.getElement().querySelector(`.${ClassName.BUTTON_ACTIVE_STATE}`);
   }
 
   _removeCurrentActiveClass() {
-    this.getElement().querySelector(`.${BUTTON_ACTIVE_STATE_CLASS_NAME}`).classList.remove(BUTTON_ACTIVE_STATE_CLASS_NAME);
+    this._getActiveSortMethodElement().classList.remove(ClassName.BUTTON_ACTIVE_STATE);
   }
 
   setDefaultSortMethod() {
     this._removeCurrentActiveClass();
-    this.getElement().querySelector(`[data-sort-method="${SortMethods.DEFAULT}"]`).classList.add(BUTTON_ACTIVE_STATE_CLASS_NAME);
-  }
-
-  _onSortButtonClick(evt) {
-    if (evt.target.tagName !== 'A') {
-      return;
-    }
-
-    evt.preventDefault();
-
-    this._removeCurrentActiveClass();
-    evt.target.classList.add(BUTTON_ACTIVE_STATE_CLASS_NAME);
-
-    this._callback.sortButtonClick(evt.target.dataset.sortMethod);
+    this.getElement().querySelector(`[data-sort-method="${SortMethod.DEFAULT}"]`).classList.add(ClassName.BUTTON_ACTIVE_STATE);
   }
 
   setSortButtonClickListener(cb) {
@@ -59,5 +54,23 @@ export default class SortMenu extends AbstractView {
 
   removeSortButtonClickListener() {
     this.getElement().removeEventListener('click', this._onSortButtonClick);
+  }
+
+  _onSortButtonClick(evt) {
+    if (evt.target.tagName !== 'A') {
+      return;
+    }
+
+    evt.preventDefault();
+
+    const previousSortMethod = this._getActiveSortMethodElement().dataset.sortMethod;
+    const newSortMethod = evt.target.dataset.sortMethod;
+
+    if (previousSortMethod !== newSortMethod) {
+      this._removeCurrentActiveClass();
+      evt.target.classList.add(ClassName.BUTTON_ACTIVE_STATE);
+    }
+
+    this._callback.sortButtonClick(newSortMethod);
   }
 }

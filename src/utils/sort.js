@@ -1,10 +1,9 @@
-import { getMostRecentDate } from '.';
-
-const getFilmDate = (film) => film.info.releaseDate;
-
-const getFilmCommentsCount = (film) => film.comments.length;
-
-const getFilmRating = (film) => film.info.rating;
+import {
+  getFilmCommentsCount,
+  getFilmDate,
+  getFilmRating,
+  getMostRecentDate
+} from '.';
 
 const compareFilmsByDate = (filmA, filmB) => {
   const dateA = getFilmDate(filmA);

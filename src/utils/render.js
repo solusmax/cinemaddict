@@ -8,29 +8,29 @@ export const RenderPosition = {
 };
 
 export const renderElement = (container, element, position = RenderPosition.BEFOREEND) => {
-  let currentContainer = container;
+  let containerElement = container;
   let currentElement = element;
 
-  if (container instanceof Abstract) {
-    currentContainer = container.getElement();
+  if (containerElement instanceof Abstract) {
+    containerElement = containerElement.getElement();
   }
 
-  if (element instanceof Abstract) {
-    currentElement = element.getElement();
+  if (currentElement instanceof Abstract) {
+    currentElement = currentElement.getElement();
   }
 
   switch (position) {
     case RenderPosition.BEFOREBEGIN:
-      currentContainer.before(currentElement);
+      containerElement.before(currentElement);
       break;
     case RenderPosition.AFTERBEGIN:
-      currentContainer.prepend(currentElement);
+      containerElement.prepend(currentElement);
       break;
     case RenderPosition.BEFOREEND:
-      currentContainer.append(currentElement);
+      containerElement.append(currentElement);
       break;
     case RenderPosition.AFTEREND:
-      currentContainer.after(currentElement);
+      containerElement.after(currentElement);
       break;
   }
 };
@@ -52,22 +52,22 @@ export const createElement = (template) => {
 };
 
 export const replaceElement = (newChild, oldChild) => {
-  let currentNewChild = newChild;
-  let currentOldChild = oldChild;
+  let newChildElement = newChild;
+  let oldChildElement = oldChild;
 
-  if (currentNewChild instanceof Abstract) {
-    currentNewChild = currentNewChild.getElement();
+  if (newChildElement instanceof Abstract) {
+    newChildElement = newChildElement.getElement();
   }
 
-  if (currentOldChild instanceof Abstract) {
-    currentOldChild = currentOldChild.getElement();
+  if (oldChildElement instanceof Abstract) {
+    oldChildElement = oldChildElement.getElement();
   }
 
-  const parent = currentOldChild.parentElement;
+  const parentElement = oldChildElement.parentElement;
 
-  if (parent === null || currentNewChild === null || currentOldChild === null) {
+  if (!parentElement || !newChildElement || !oldChildElement) {
     throw new Error('Can\'t replace unexisting elements');
   }
 
-  parent.replaceChild(currentNewChild, currentOldChild);
+  parentElement.replaceChild(newChildElement, oldChildElement);
 };

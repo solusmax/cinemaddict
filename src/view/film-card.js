@@ -1,14 +1,14 @@
 import AbstractFilmCardView from './abstract-film-card.js';
 import {
-  addPluralEnding,
+  getActivityClass,
   getFormattedDuration,
-  getYearFromDate,
-  setActiveClass
+  getPluralEnding,
+  getYearFromDate
 } from '../utils';
 
-const MAX_LETTERS_IN_SHORT_DESCRIPTION = 140;
+const MAX_LETTERS_IN_DESCRIPTION = 140;
 
-const ClassNames = {
+const ClassName = {
   CONTROL_ACTIVE_STATE: 'film-card__controls-item--active',
   COMMENTS_LINK: 'film-card__comments',
   POSTER: 'film-card__poster',
@@ -18,8 +18,8 @@ const ClassNames = {
   MARK_AS_FAVORITE_CONTROL: 'film-card__controls-item--favorite',
 };
 
-const getShortDescription = (description) => description.length > MAX_LETTERS_IN_SHORT_DESCRIPTION
-  ? `${description.slice(0, MAX_LETTERS_IN_SHORT_DESCRIPTION - 1).trim()}…`
+const getShortDescription = (description) => description.length > MAX_LETTERS_IN_DESCRIPTION
+  ? `${description.slice(0, MAX_LETTERS_IN_DESCRIPTION - 1).trim()}…`
   : description;
 
 const createFilmCardTemplate = (film, updatingUserMetaFilmsIds) => {
@@ -55,11 +55,11 @@ const createFilmCardTemplate = (film, updatingUserMetaFilmsIds) => {
       </p>
       <img src="${poster}" alt="" class="film-card__poster">
       <p class="film-card__description">${getShortDescription(description)}</p>
-      <a class="film-card__comments">${commentsIds.length} comment${addPluralEnding(commentsIds.length)}</a>
+      <a class="film-card__comments">${commentsIds.length} comment${getPluralEnding(commentsIds.length)}</a>
       <div class="film-card__controls">
-        <button class="film-card__controls-item ${ClassNames.ADD_TO_WATCHLIST_CONTROL} ${setActiveClass(isOnWatchlist, ClassNames.CONTROL_ACTIVE_STATE)}" type="button" ${hasUserMetaUpdating ? 'disabled' : ''}>Add to watchlist</button>
-        <button class="film-card__controls-item ${ClassNames.MARK_AS_WATCHED_CONTROL} ${setActiveClass(isWatched, ClassNames.CONTROL_ACTIVE_STATE)}" type="button" ${hasUserMetaUpdating ? 'disabled' : ''}>Mark as watched</button>
-        <button class="film-card__controls-item ${ClassNames.MARK_AS_FAVORITE_CONTROL} ${setActiveClass(isFavorite, ClassNames.CONTROL_ACTIVE_STATE)}" type="button" ${hasUserMetaUpdating ? 'disabled' : ''}>Mark as favorite</button>
+        <button class="film-card__controls-item ${ClassName.ADD_TO_WATCHLIST_CONTROL} ${getActivityClass(isOnWatchlist, ClassName.CONTROL_ACTIVE_STATE)}" type="button" ${hasUserMetaUpdating ? 'disabled' : ''}>Add to watchlist</button>
+        <button class="film-card__controls-item ${ClassName.MARK_AS_WATCHED_CONTROL} ${getActivityClass(isWatched, ClassName.CONTROL_ACTIVE_STATE)}" type="button" ${hasUserMetaUpdating ? 'disabled' : ''}>Mark as watched</button>
+        <button class="film-card__controls-item ${ClassName.MARK_AS_FAVORITE_CONTROL} ${getActivityClass(isFavorite, ClassName.CONTROL_ACTIVE_STATE)}" type="button" ${hasUserMetaUpdating ? 'disabled' : ''}>Mark as favorite</button>
       </div>
     </article>`
   );
@@ -78,46 +78,34 @@ export default class FilmCard extends AbstractFilmCardView {
     return createFilmCardTemplate(this._film, this._updatingUserMetaFilmsIds);
   }
 
+  getListType() {
+    return this.getElement().parentElement.parentElement.id;
+  }
+
   // Геттеры элементов ↓↓↓
 
   _getAddToWatchlistButtonElement() {
-    return this.getElement().querySelector(`.${ClassNames.ADD_TO_WATCHLIST_CONTROL}`);
+    return this.getElement().querySelector(`.${ClassName.ADD_TO_WATCHLIST_CONTROL}`);
   }
 
   _getMarkAsWatchedButtonElement() {
-    return this.getElement().querySelector(`.${ClassNames.MARK_AS_WATCHED_CONTROL}`);
+    return this.getElement().querySelector(`.${ClassName.MARK_AS_WATCHED_CONTROL}`);
   }
 
   _getMarkAsFavoriteButtonElement() {
-    return this.getElement().querySelector(`.${ClassNames.MARK_AS_FAVORITE_CONTROL}`);
+    return this.getElement().querySelector(`.${ClassName.MARK_AS_FAVORITE_CONTROL}`);
   }
 
   _getCommentsLinkElement() {
-    return this.getElement().querySelector(`.${ClassNames.COMMENTS_LINK}`);
+    return this.getElement().querySelector(`.${ClassName.COMMENTS_LINK}`);
   }
 
   _getPosterElement() {
-    return this.getElement().querySelector(`.${ClassNames.POSTER}`);
+    return this.getElement().querySelector(`.${ClassName.POSTER}`);
   }
 
   _getTitleElement() {
-    return this.getElement().querySelector(`.${ClassNames.TITLE}`);
-  }
-
-  // Колбэки листенеров ↓↓↓
-
-  _onCommentsLinkClick(evt) {
-    evt.preventDefault();
-
-    this._callback.commentsLinkClick();
-  }
-
-  _onPosterClick() {
-    this._callback.posterClick();
-  }
-
-  _onTitleClick() {
-    this._callback.titleClick();
+    return this.getElement().querySelector(`.${ClassName.TITLE}`);
   }
 
   // Сеттеры листенеров ↓↓↓
@@ -141,6 +129,7 @@ export default class FilmCard extends AbstractFilmCardView {
     this.setAddToWatchlistButtonClickListener(this._callback.addToWatchlistButtonClick);
     this.setMarkAsWatchedButtonClickListener(this._callback.markAsWatchedButtonClick);
     this.setMarkAsFavoriteButtonClickListener(this._callback.markAsFavoriteButtonClick);
+
     this.setCommentsLinkClickListener(this._callback.commentsLinkClick);
     this.setPosterClickListener(this._callback.posterClick);
     this.setTitleClickListener(this._callback.titleClick);
@@ -158,5 +147,21 @@ export default class FilmCard extends AbstractFilmCardView {
 
   removeTitleClickListener() {
     this._getTitleElement().removeEventListener('click', this._onTitleClick);
+  }
+
+  // Колбэки листенеров ↓↓↓
+
+  _onCommentsLinkClick(evt) {
+    evt.preventDefault();
+
+    this._callback.commentsLinkClick();
+  }
+
+  _onPosterClick() {
+    this._callback.posterClick();
+  }
+
+  _onTitleClick() {
+    this._callback.titleClick();
   }
 }
