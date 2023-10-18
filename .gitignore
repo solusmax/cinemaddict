@@ -1,16 +1,18 @@
-# Файлы и папки операционной системы
+.AppleDouble
 .DS_Store
-Thumbs.db
-
-# Файлы редактора
 .idea
-*.sublime*
-.vscode
-
-# Вспомогательные файлы
-*.log*
+.LSOverride
+.vscode/
+[Dd]esktop.ini
+*.lnk
+*.log
+build/
+ehthumbs_vista.db
+ehthumbs.db
 node_modules/
-
-# Собранные файлы
+npm-debug.*
+.sow/
+Thumbs.db
+Thumbs.db:encryptable
 public/bundle.js
 public/bundle.js.map
